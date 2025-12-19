@@ -1,0 +1,284 @@
+body {
+    margin: 0;
+    font-family: "Noto Sans TC", sans-serif;
+    background: #f2f2f2;
+}
+
+/* 整體三欄布局 */
+.main-wrapper {
+    display: grid;
+    grid-template-columns: 120px 1fr 420px; /* 左、中、右 */
+    gap: 30px;
+    padding: 30px 40px;
+}
+
+/* 左側欄 */
+.left-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.breadcrumb {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* 縮圖列表 */
+.thumb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 90px;               /* 左側欄固定寬度 */
+}
+
+.thumb-item {
+    width: 80px;               /* 每個縮圖框 固定大小 */
+    height: 80px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f3f3f3;       /* 沒載入圖片時也不會跳動 */
+    cursor: pointer;
+}
+
+.thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;         /* ⭐ 保持圖片比例，但裁切填滿方框 */
+    transition: .2s;
+}
+
+.thumb-item:hover img {
+    transform: scale(1.05);
+}
+
+/* 主圖區 */
+.image-panel {
+    display: flex;
+    justify-content: center;
+    
+    width: 100%;
+}
+
+/* 主圖片自適應視窗大小 */
+.main-image {
+    width: 100%;         /* ⭐ 讓圖片寬度跟著中間欄位變化 */
+    height: auto;        /* 保持比例 */
+    max-height: 90vh;    /* ⭐ 不超過可視高度 */
+    object-fit: contain; /* 不裁切，完整顯示圖片 */
+}
+
+/* 右側資訊 */
+.info-panel {
+    padding-right: 40px;
+}
+
+.title {
+    font-size: 24px;
+    line-height: 1.4;
+}
+
+/* 活動框 */
+.promo-box {
+    background: #ececec;
+    padding: 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+    font-size: 14px;
+}
+
+/* 價格區 */
+.price-box {
+    margin: 10px 0 25px;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #777;
+    font-size: 18px;
+}
+
+.new-price {
+    display: block;
+    margin-top: 5px;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+/* 預購框 */
+.preorder-box {
+    background: #404040;
+    color: white;
+    padding: 25px;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+/* 數量調整 */
+.qty-selector {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.qty-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #ddd;
+    font-size: 22px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.qty-btn:hover {
+    background: #bbb;
+}
+
+/* 購買按鈕 */
+.buy-btn {
+    width: 100%;
+    padding: 16px 0;
+    background: #505050;
+    color: white;
+    border: none;
+    font-size: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.size-box {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.size-box label {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.size-select {
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    background: #f7f7f7;
+}
+
+/* 商品描述外框 */
+.desc-wrapper {
+    margin-top: 40px;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+}
+
+/* 標題（含收合按鈕） */
+.desc-header {
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding-bottom: 10px;
+    font-weight: 100;
+}
+
+.toggle-btn {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* 內容區 */
+.desc-content {
+    margin-top: 15px;
+    line-height: 1.7;
+    font-size: 15px;
+    color: #333;
+}
+
+/* 亮點文字 */
+.desc-highlight {
+    font-weight: bold;
+    font-size: 17px;
+}
+
+/* 次標題 */
+.desc-content h3 {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+/* 列表 */
+.desc-list {
+    padding-left: 20px;
+    list-style: disc;
+    margin-bottom: 20px;
+}
+
+.desc-list li {
+    margin-bottom: 8px;
+}
+
+.hidden {
+    display: none;
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  width: 100%;
+}
+
+.product-card {
+  background: #fff;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+}
+
+/* 商品圖片 */
+.product-grid img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+/* 商品資訊 */
+.product-info {
+  padding: 10px 5px;
+}
+
+.product-title {
+  font-size: 15px;
+  color: #222;
+  font-weight: 500;
+  margin: 10px 0 8px;
+  min-height: 48px;
+  line-height: 1.4;
+}
+
+.product-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #d33;
+}
+
+.product-old-price {
+  font-size: 14px;
+  color: #999;
+  text-decoration: line-through;
+  margin-top: 4px;
+}

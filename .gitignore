@@ -4,3 +4,5 @@ __pycache__/
 
 # Virtual env
 .venv/
+# Firebase secrets
+shopping-54704-firebase-adminsdk-fbsvc-abdc0effc3.json

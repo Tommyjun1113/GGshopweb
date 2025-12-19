@@ -23,6 +23,8 @@ nav .logo {
 .content {
   position: relative;
   top: 10px;
+  width: 100%;
+  overflow-x: hidden;
   padding: 0 100px;
 }
 .content h2.header {

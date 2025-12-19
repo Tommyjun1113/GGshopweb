@@ -56,24 +56,20 @@
         <li><a href="/contact/">CONTACT</a></li>
       </ul>
     </nav>
-  </header>
-
-  <!-- ================= 右上角會員 / 購物車 ================= -->
-
   <div class="top-right-icons">
-    <div id="member-area">
-    <a href="/login/" id="login-btn">
-      <img src="{% static 'member.jpg' %}" width="35" alt="登入">
-    </a>
-  </div>
+      <div id="member-area">
+        <a href="/login/" id="login-btn">
+          <img src="{% static 'member.jpg' %}" width="35" alt="登入">
+        </a>
+      </div>
 
   <!-- 購物車 -->
-  <a href="/cart/" class="cart-icon position-relative">
-    <img src="{% static 'shopping-cart.jpg' %}" width="35" alt="購物車">
-    <span id="cart-badge" class="cart-badge d-none">0</span>
-  </a>
+        <a href="/cart/" class="cart-icon position-relative">
+          <img src="{% static 'shopping-cart.jpg' %}" width="35" alt="購物車">
+          <span id="cart-badge" class="cart-badge d-none">0</span>
+        </a>
   </div>
-
+</header>
   <!-- ================= 新會員 Banner ================= -->
   {% block top_banner %}
     <div class="newmember">

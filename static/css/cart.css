@@ -209,15 +209,3 @@
     color: white;
     text-decoration: none;
 }
-
-/* ====== RWD ====== */
-@media (max-width: 900px) {
-    .cart-item {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .cart-qty {
-        justify-content: flex-start;
-    }
-}

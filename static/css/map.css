@@ -22,19 +22,3 @@
     border-radius: 8px;
 }
 
-/* 手機版自動上下排列 */
-@media (max-width: 900px) {
-    .about-wrapper {
-        flex-direction: column;   /* ⭐ 改成上下排列 */
-        align-items: center;
-    }
-
-    .about-map iframe {
-        width: 100%;
-        height: 300px;
-    }
-
-    .about-text {
-        max-width: 100%;
-    }
-}

@@ -1,68 +1,175 @@
-/* === 商品區塊排版（電腦預設 3 欄） === */
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-    width: 100%;
-}
-
-/* === 商品卡片 === */
-.product-card {
-    background: #fff;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-.product-card:hover {
-    transform: translateY(-3px);
-}
-
-/* === 商品圖片（方形 + 不變形 + RWD） === */
-.product-grid img {
-    width: 100%;
-    aspect-ratio: 1 / 1;  /* 保持正方形 */
-    object-fit: cover;    /* 自動裁切避免變形 */
-    border-radius: 8px;
-    display: block;
-}
-
-/* === 商品資訊 === */
-.product-info {
-    padding: 10px 5px;
-}
-
-.product-title {
-    font-size: 15px;
-    color: #222;
-    font-weight: 500;
-    margin: 10px 0 8px;
-    min-height: 48px;
-    line-height: 1.4;
-}
-
-.product-price {
-    font-size: 18px;
-    font-weight: 700;
-    color: #d33;
-}
-
-.product-old-price {
-    font-size: 14px;
-    color: #999;
-    text-decoration: line-through;
-    margin-top: 4px;
-}
 
 /* === 平板（<=992px）顯示兩欄 === */
 @media (max-width: 992px) {
-    .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+
+  /* ===== 商品列表 ===== */
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* ===== 購物車 ===== */
+  .cart-item {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .cart-qty {
+    justify-content: flex-start;
+  }
+
+  /* ===== 商品內頁 ===== */
+  .main-wrapper {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: auto;
+  }
+
+  .left-panel {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    padding: 10px 0;
+  }
+
+  .thumb-list {
+    display: flex;
+    flex-direction: row !important;
+    gap: 10px;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    width: 100% !important;
+    height: 60px;
+  }
+
+  .thumb-item {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+  }
+
+  .image-panel {
+    grid-row: 2;
+    width: 100%;
+  }
+
+  .info-panel {
+    grid-row: 3;
+    width: 100%;
+    padding-right: 0;
+  }
+
+  /* ===== About 頁 ===== */
+  .about-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .about-map iframe {
+    width: 100%;
+    height: 300px;
+  }
+
+  .about-text {
+    max-width: 100%;
+  }
 }
 
 /* === 手機（<=768px）顯示一欄，不跑版 === */
 @media (max-width: 768px) {
-    .product-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
+
+  /* ===== 商品列表 ===== */
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .menu {
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+    margin-top: 8px;
+  }
+
+  .menu li a {
+    font-size: 14px;
+  }
+
+  .top-right-icons {
+    position: static;
+    margin-top: 10px;
+    display: flex;
+    gap: 16px;
+  }
+
+  /* ===== Banner ===== */
+  .newmember img {
+    max-height: 200px;
+    object-fit: cover;
+  }
+}
+/* === 小手機（<=480px）微調字體與間距 === */
+@media (max-width: 480px) {
+
+  /* ===== Login 頁 ===== */
+  .login-container {
+    max-width: 100%;
+    margin: 40px 16px;
+    padding: 32px 20px;
+  }
+
+  .login-title {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .login-input {
+    font-size: 16px;
+    padding: 16px 12px;
+  }
+
+  .forgot-password {
+    font-size: 14px;
+    text-align: right;
+  }
+
+  .login-btn {
+    font-size: 18px;
+    padding: 16px 0;
+    border-radius: 8px;
+  }
+
+  .divider {
+    font-size: 13px;
+    margin: 28px 0 20px;
+  }
+
+  .social-login {
+    gap: 20px;
+  }
+
+  .social-btn {
+    width: 56px;
+    height: 56px;
+  }
+
+  .social-btn img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .register-section h3 {
+    font-size: 16px;
+  }
+
+  .register-btn {
+    font-size: 16px;
+    padding: 14px 0;
+    border-radius: 8px;
+  }
 }

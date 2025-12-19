@@ -18,6 +18,12 @@
     font-size: 14px;
     font-weight: 600;
 }
+.newmember img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 
 .logout-link {
     margin-right: 15px;

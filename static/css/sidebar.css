@@ -1,0 +1,49 @@
+.page-layout {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.sidebar-menu {
+    text-align: center;
+    width: 250px;
+    flex-shrink: 0;
+    
+}
+
+
+.sidebar-menu a,
+.sidebar-menu .menu-title {
+    color: #000 !important; 
+}
+
+.shop-content {
+    flex: 1;
+}
+
+.menu-title{
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.submenu{
+    list-style: none;
+}
+
+@media (max-width: 768px) {
+    .page-layout {
+        display: block; /* 手機版改成上下排列 */
+    }
+
+    .sidebar-menu {
+        width: 100%;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .submenu a {
+        font-size: 18px;
+    }
+}

@@ -1,0 +1,32 @@
+<h1>我的訂單</h1>
+
+{% if orders %}
+    {% for order in orders %}
+        <hr>
+        <h3>訂單編號：{{ order.id }}</h3>
+        <p>下單時間：{{ order.created_at }}</p>
+        <p>總金額：NT$ {{ order.total }}</p>
+
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>商品</th>
+                <th>尺寸</th>
+                <th>數量</th>
+                <th>單價</th>
+                <th>小計</th>
+            </tr>
+
+            {% for item in order.items.all %}
+            <tr>
+                <td>{{ item.title }}</td>
+                <td>{{ item.size }}</td>
+                <td>{{ item.qty }}</td>
+                <td>NT$ {{ item.price }}</td>
+                <td>NT$ {{ item.subtotal }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+{% else %}
+    <p>尚無訂單紀錄</p>
+{% endif %}

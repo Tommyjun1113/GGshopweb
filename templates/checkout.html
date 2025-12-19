@@ -1,0 +1,49 @@
+{% extends "GGshopping.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock head %}
+
+{% block content %}
+
+<h1 class="checkout-title">結帳確認</h1>
+
+<div class="checkout-container">
+
+    <table class="checkout-table">
+        <thead>
+            <tr>
+                <th>商品</th>
+                <th>尺寸</th>
+                <th>數量</th>
+                <th>小計</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for item in cart.values %}
+            <tr>
+                <td class="product-name">{{ item.title }}</td>
+                <td>{{ item.size }}</td>
+                <td>{{ item.qty }}</td>
+                <td class="price">NT$ {{ item.subtotal }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="checkout-summary">
+        <div class="checkout-total">
+            總金額 <span>NT$ {{ total }}</span>
+        </div>
+
+        <form method="post" action="/order/submit/">
+            {% csrf_token %}
+            <button type="submit" class="btn-submit">確認下單</button>
+        </form>
+    </div>
+
+</div>
+
+{% endblock content %}

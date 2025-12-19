@@ -1,0 +1,62 @@
+{% extends "GGshopping.html" %}
+
+{% block head %}
+{% endblock head %}
+
+    
+
+{% block content %}
+<div class="sidebar-menu">
+    <div class="menu-item">
+        <div class="menu-title">我的帳戶</div>
+        <ul class="submenu">
+            <li><a href=>帳戶設定</a></li>
+            <li><a href=>購買紀錄</a></li>
+            <li><a href=>我的最愛</a></li>
+            <li><a href=>刪除會員資格</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="prodile-card">
+    <h2>會員資料</h2>    
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="msg{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>
+        使用者名稱
+        <input type="text" name="display_name" value="{{ user.first_name }}" required>
+    </label>
+
+    <label>
+        手機號碼
+        <input type="text" name="display_name" value="{{ user.phone }}" >
+    </label>
+
+    <label>
+        電子郵件
+        <input type="text" name="display_name" value="{{ user.email }}" >
+    </label>
+
+    <label>
+        帳號(Email)
+        <input type="email" value="{{ user.email }}" disabled>
+    </label>
+
+    <label>
+        密碼
+        <a href="">變更密碼</a>
+    </label>
+
+
+    <button type="submit">儲存修改</button>
+</form>
+</div>
+{% endblock content %}

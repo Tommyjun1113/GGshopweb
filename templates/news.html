@@ -1,0 +1,57 @@
+{% extends 'GGshopping.html' %}
+{% load static %}
+
+{% block title %}
+<title>最新消息｜GG SHOP</title>
+{% endblock title %}
+
+{% block head %}
+<!-- News 專用 CSS -->
+<link rel="stylesheet" href="{% static 'css/news.css' %}">
+{% endblock head %}
+
+{% block content %}
+
+<div class="container mt-4">
+  <div class="row g-4">
+
+    <!-- 活動 1 -->
+    <div class="col-md-3 col-sm-6">
+      <a href="/news/1/" class="news-link">
+        <div class="card h-100">
+          <img
+            src="{% static 'newarrival.png' %}"
+            class="card-img-top"
+            alt="新品上市"
+          >
+          <div class="card-body">
+            <p class="text-muted mb-1">2025/12/5</p>
+            <h6 class="card-title">新品上市</h6>
+            <p class="card-text">12月新品，潮流上市</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 活動 2 -->
+    <div class="col-md-3 col-sm-6">
+      <a href="/news/2/" class="news-link">
+        <div class="card h-100">
+          <img
+            src="{% static 'discount.png' %}"
+            class="card-img-top"
+            alt="年末促銷"
+          >
+          <div class="card-body">
+            <p class="text-muted mb-1">即日起至 2025/12/31</p>
+            <h6 class="card-title">年末促銷</h6>
+            <p class="card-text">12月 滿三千折三百</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,78 @@
+{% extends "GGshopping.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock head %}
+
+{% block content %}
+
+<h1 class="cart-title">購物車</h1>
+
+{% if cart %}
+<div class="cart-container">
+
+    {% for key, item in cart.items %}
+    <div class="cart-item">
+        
+        <!-- 商品圖 -->
+        <div class="cart-img">
+            <img src="{{ item.image }}" alt="{{ item.title }}">
+        </div>
+
+        <!-- 商品資訊 -->
+        <div class="cart-info">
+            <div class="cart-name">{{ item.title }}</div>
+            <div class="cart-size">尺寸：{{ item.size }}</div>
+        </div>
+
+        <!-- 單價 -->
+        <div class="cart-price">NT$ {{ item.price }}</div>
+
+        <!-- 數量 -->
+        <div class="cart-qty">
+            <a href="{% url 'cart_dec' key %}" class="qty-btn">−</a>
+            <span>{{ item.qty }}</span>
+            <a href="{% url 'cart_inc' key %}" class="qty-btn">＋</a>
+        </div>
+
+        <!-- 小計 -->
+        <div class="cart-subtotal">NT$ {{ item.subtotal }}</div>
+
+        <!-- 刪除 -->
+        <div class="cart-remove">
+            <a href="{% url 'cart_remove' key %}">刪除</a>
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+<div class="cart-footer">
+
+    <!-- 左側：繼續購物 -->
+    <div class="cart-footer-left">
+        <a href="/shop/" class="cart-back">← 繼續購物</a>
+    </div>
+
+    <!-- 右側：金額 + 按鈕 -->
+    <div class="cart-footer-right">
+        <div class="cart-total">
+            總金額 <span>NT$ {{ total }}</span>
+        </div>
+
+        <div class="cart-actions">
+            <a href="{% url 'cart_clear' %}" class="btn-clear">清空購物車</a>
+            <a href="{% url 'checkout' %}" class="btn-checkout">結帳</a>
+        </div>
+    </div>
+
+</div>
+
+{% else %}
+<p class="cart-empty">購物車是空的</p>
+<a href="/shop/" class="cart-back">← 繼續購物</a>
+{% endif %}
+
+{% endblock content %}

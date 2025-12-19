@@ -1,0 +1,127 @@
+{% extends 'GGshopping.html' %}
+{% load static %}
+
+{% block title %}
+<title>商品頁｜GG SHOP</title>
+{% endblock title %}
+
+{% block top_banner %}
+<!-- 商品頁不要顯示首頁 banner / newmember 圖 -->
+{% endblock top_banner %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/product.css' %}">
+{% endblock head %}
+
+{% block content %}
+
+<div class="main-wrapper container mt-4">
+
+  <!-- 左側欄 -->
+  <div class="left-panel">
+
+    <div class="breadcrumb">
+      細節圖片
+    </div>
+
+    <div class="thumb-list"></div>
+  </div>
+
+  <!-- 中間主圖 -->
+  <div class="image-panel">
+    <img id="mainImage" src="" class="main-image">
+  </div>
+
+  <!-- 右側資訊 -->
+  <div class="info-panel">
+
+    <h1 class="title"></h1>
+
+    <!-- 活動框 -->
+    <div class="promo-box">
+      至12/31 23:59截止 全店，滿3000折300
+    </div>
+
+    <!-- 價格 -->
+    <div class="price-box">
+      <span class="old-price"></span>
+      <span class="new-price"></span>
+    </div>
+
+    <!-- 預購描述 -->
+    <div class="preorder-box">
+      預購商品須等待約2-4周（不含假日）<br>
+      依訂單順序陸續出貨
+    </div>
+
+    <!-- 尺寸 -->
+    <div class="size-box">
+      <label for="sizeSelect">選擇尺寸</label>
+      <select id="sizeSelect" class="size-select">
+        <option disabled selected>請選擇</option>
+        <option>US 7</option>
+        <option>US 8</option>
+        <option>US 9</option>
+        <option>US 10</option>
+      </select>
+    </div>
+
+    <!-- 數量 -->
+    <div class="qty-selector">
+      <button type="button" onclick="changeQty(-1)" class="qty-btn">−</button>
+      <span id="qtyValue">1</span>
+      <button type="button" onclick="changeQty(1)" class="qty-btn">＋</button>
+    </div>
+
+    <!-- 加入購物車 -->
+    <form method="post" action="/cart/add/">
+      {% csrf_token %}
+      <input type="hidden" name="sku">
+      <input type="hidden" name="title">
+      <input type="hidden" name="price">
+      <input type="hidden" name="image">
+      <input type="hidden" name="qty" id="cartQty" value="1">
+      <input type="hidden" name="size" id="cartSize">
+
+      <button type="submit" class="buy-btn">
+        加入購物車
+      </button>
+    </form>
+
+    <!-- 商品描述 -->
+    <div class="desc-wrapper">
+
+      <div class="desc-header" onclick="toggleDesc()">
+        <span>商品描述</span>
+        <span id="descToggle" class="toggle-btn">+</span>
+      </div>
+
+      <div id="descContent" class="desc-content hidden">
+
+        <p class="desc-highlight">版型偏小，建議大半號購買。</p>
+
+        <h3>Detail</h3>
+        <ul class="desc-list">
+          <li>皮革鞋面搭配沖孔鞋頭設計，舒適又透氣。</li>
+          <li>採用 Nike Air 緩震系統，提供全天候的輕量舒適感。</li>
+          <li>橡膠外底打造卓越抓地力與耐久性。</li>
+        </ul>
+
+        <h3>⚠️ 商品注意事項 ⚠️</h3>
+        <ul class="desc-list">
+          <li>預購商品以實際到貨時間為準。</li>
+          <li>GGSHOP 保留訂單更改之權利。</li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/products-data.js' %}"></script>
+<script src="{% static 'js/product.js' %}"></script>
+{% endblock extra_js %}

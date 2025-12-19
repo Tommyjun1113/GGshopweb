@@ -1,0 +1,14 @@
+html, body {
+    height: 100%;
+}
+
+.site {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;  /* 撐開空間，把 footer 推到底部 */
+    padding-top: 120px;   /* 必須等於 header 高度 */
+}

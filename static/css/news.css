@@ -1,0 +1,33 @@
+.news-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.news-link:hover {
+  color: inherit;
+}
+
+.card {
+  transition: all .10s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,.15);
+}
+
+
+.news-img-wrapper {
+  max-width: 900px;
+  aspect-ratio: 16 / 9;   
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.news-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit:contain;     
+  display: block;
+}

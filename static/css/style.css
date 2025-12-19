@@ -1,0 +1,68 @@
+/* === 商品區塊排版（電腦預設 3 欄） === */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    width: 100%;
+}
+
+/* === 商品卡片 === */
+.product-card {
+    background: #fff;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+.product-card:hover {
+    transform: translateY(-3px);
+}
+
+/* === 商品圖片（方形 + 不變形 + RWD） === */
+.product-grid img {
+    width: 100%;
+    aspect-ratio: 1 / 1;  /* 保持正方形 */
+    object-fit: cover;    /* 自動裁切避免變形 */
+    border-radius: 8px;
+    display: block;
+}
+
+/* === 商品資訊 === */
+.product-info {
+    padding: 10px 5px;
+}
+
+.product-title {
+    font-size: 15px;
+    color: #222;
+    font-weight: 500;
+    margin: 10px 0 8px;
+    min-height: 48px;
+    line-height: 1.4;
+}
+
+.product-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #d33;
+}
+
+.product-old-price {
+    font-size: 14px;
+    color: #999;
+    text-decoration: line-through;
+    margin-top: 4px;
+}
+
+/* === 平板（<=992px）顯示兩欄 === */
+@media (max-width: 992px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* === 手機（<=768px）顯示一欄，不跑版 === */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}

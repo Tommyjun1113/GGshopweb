@@ -1,0 +1,31 @@
+.top-right-icons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  /* 也可以使用 fixed 屬性，讓它在滾動時也固定在右上角 */
+  /* position: fixed; */
+}
+
+.top-right-icons a {
+  margin-left: 10px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+}
+
+.welcome-text {
+    margin-right: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.logout-link {
+    margin-right: 15px;
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+}
+
+.logout-link:hover {
+    text-decoration: underline;
+}

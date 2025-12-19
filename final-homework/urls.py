@@ -20,7 +20,6 @@ from myapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
     # path('final-homework/',views.final-homework),
     path('GGshopping/', views.GGshopping),
     path('news/', views.news),
@@ -31,24 +30,23 @@ urlpatterns = [
     path('contact/', views.contact),
     path('product/', views.product),
     
+    path("login/", views.login_page, name="login"),
+    path("login/line/callback/",views.line_callback),
 
-    path('register/send-code/', views.send_register_code, name='send_register_code'),
-    path('register/confirm/', views.confirm_register, name='confirm_register'),
-    path('forgot/send-code/', views.forgot_send_code, name='forgot_send_code'),
-    path('forgot/confirm/', views.forgot_confirm, name='forgot_confirm'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
-    path('', views.GGshopping, name='home'),
-    path("cart/", views.cart_view, name="cart"),
-    path("cart/add/", views.cart_add, name="cart_add"),
-    path("cart/clear/", views.cart_clear, name="cart_clear"),
-    path("cart/inc/<str:key>/", views.cart_inc, name="cart_inc"),
-    path("cart/dec/<str:key>/", views.cart_dec, name="cart_dec"),
-    path("cart/remove/<str:key>/", views.cart_remove, name="cart_remove"),
-    path("checkout/", views.checkout_view, name="checkout"),
-    path("order/submit/", views.order_submit, name="order_submit"),
-    path("orders/", views.order_list, name="order_list"),
-    path("profile/", views.profile, name="profile"),
+    path("api/profile/", views.api_profile),
+    path("api/profile/update/", views.api_profile_update),
+
+    path("api/forgot/send-code/",views.api_forgot_send_code),
+    path("api/forgot/verify-code/",views.api_forgot_verify_code),
+    path("api/forgot/reset-password/",views.api_forgot_reset_password),
+
+    path("cart/",views.cart_page, name="cart"),
+    path("api/cart/", views.api_cart),
+    path("api/cart/add/", views.api_cart_add),
+    path("api/cart/delete/<str:cart_id>/", views.api_cart_delete),
+
+    path("api/order/submit/", views.api_order_submit),
+    path("api/orders/", views.api_orders),
     
 
 ]

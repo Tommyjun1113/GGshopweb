@@ -18,8 +18,8 @@
     <!-- ================= 登入 ================= -->
     <div id="loginBox" class="form-box active">
         <h1 class="login-title">登入</h1>
-
-       <form method="post" action="{% url 'login' %}">
+        <div id="login-error" class="login-error"></div>
+       <form id="login-form" onsubmit="return false;">
             {% csrf_token %}
 
             <input
@@ -39,12 +39,12 @@
                 required
             >
 
-            <button class="login-btn" type="submit">
+            <button class="login-btn" id="email-login-btn" type="button">
                 登入
             </button>
         </form>
 
-        <div class="forgot-password" onclick="switchToForgot()">
+        <div class="forgot-password" type="button" onclick="goToForgotStep1()">
             忘記密碼？
         </div>
 
@@ -61,7 +61,7 @@
 
         <div class="register-section">
             <h3>還不是會員？</h3>
-            <button class="register-btn" type="button" onclick="switchToRegister()">
+            <button class="register-btn" type="button" onclick="goToreRisterStep1()">
                 註冊會員
             </button>
         </div>
@@ -91,21 +91,15 @@
 
         <!-- 註冊 Step 2 -->
         <div id="registerStep2" class="form-step">
-            <h1 class="login-title">驗證與設定密碼</h1>
+            <h1 class="login-title">設定密碼</h1>
 
-            <form method="post" action="{% url 'confirm_register' %}">
+            <form id="register-form" onsubmit="return false;">
                 {% csrf_token %}
-                <input class="login-input" name="code" placeholder="驗證碼" required>
                 <input class="login-input" name="password" type="password" placeholder="設定密碼(至少6位數)" minlength="6" required>
                 <input class="login-input" name="password2" type="password" placeholder="確認密碼(至少6位數)" minlength="6" required>
 
-                <button class="login-btn" type="submit">完成註冊</button>
+                <button class="login-btn" id="register-btn" type="button">完成註冊</button>
             </form>
-
-            <div class="helper-text">
-                <span id="countdown">60</span> 秒後可重新發送
-                <span id="resend" style="display:none;" onclick="resendCode()">重新發送</span>
-            </div>
         </div>
     </div>
 
@@ -118,42 +112,352 @@
 
             <input class="login-input" id="forgotAccount" placeholder="請輸入 Email 或手機">
 
-            <button class="login-btn" type="button" onclick="goForgotStep2()">
+            <button class="login-btn" id="forgot-btn" type="button" onclick="goForgotStep2()">
                 發送驗證碼
             </button>
 
-            <div class="forgot-password" onclick="switchToLogin()">
+            <div class="forgot-password" type="button" onclick="switchToLogin()">
                 ← 返回登入
             </div>
         </div>
 
         <!-- 忘記密碼 Step 2 -->
         <div id="forgotStep2" class="form-step">
+            <h1 class="login-title">輸入驗證碼</h1>
+
+            <input class="login-input" id="forgotCode" placeholder="驗證碼">
+
+            <button class="login-btn" id="forgot-confirm-btn">驗證</button>
+        </div>
+
+        <!-- 忘記密碼 Step 3 -->
+        <div id="resetPasswordBox" class="form-step">
             <h1 class="login-title">重設密碼</h1>
 
-            <form method="post" action="{% url 'forgot_confirm' %}">
-                {% csrf_token %}
-                <input class="login-input" name="code" placeholder="驗證碼" required>
-                <input class="login-input" name="password" type="password" placeholder="新密碼" minlength="6" required>
-                <input class="login-input" name="password2" type="password" placeholder="確認新密碼" minlength="6" required>
+            <input class="login-input" id="newPwd" type="password" placeholder="新密碼">
+            <input class="login-input" id="newPwd2" type="password" placeholder="確認新密碼">
 
-                <button class="login-btn" type="submit">
-                    重設密碼
-                </button>
-            </form>
-
-            <div class="helper-text">
-                <span id="forgotCountdown">60</span> 秒後可重新發送
-                <span id="forgotResend" style="display:none;" onclick="resendForgotCode()">重新發送</span>
-            </div>
+            <button class="login-btn" id="reset-password-btn">確認重設</button>
         </div>
     </div>
-
 </div>
-
 {% endblock content %}
 {% block extra_js %}
 <meta name="csrf-token" content="{{ csrf_token }}">
-<script src="{% static 'js/login.js' %}"></script>
+
+<script>
+function showError(id, message) {
+  const box = document.getElementById(id);
+  if (!box) return;
+  box.innerText = message;
+  box.style.display = "flex";
+}
+
+function hideError(id) {
+  const box = document.getElementById(id);
+  if (!box) return;
+  box.innerText = "";
+  box.style.display = "none";
+}
+
+function firebaseErrorToMessage(err) {
+  switch (err.code) {
+    case "auth/user-not-found":
+      return "此帳號尚未註冊";
+    case "auth/wrong-password":
+      return "密碼錯誤，請重新輸入";
+    case "auth/invalid-email":
+      return "Email 格式錯誤";
+    case "auth/email-already-in-use":
+      return "此 Email 已被註冊";
+    case "auth/weak-password":
+      return "密碼強度不足（至少 6 碼）";
+    case "auth/invalid-credential":
+      return "帳號或密碼錯誤";
+    default:
+      return "操作失敗，請稍後再試";
+  }
+}
+</script>
+
+<script>
+function hideAllBoxes() {
+  document.querySelectorAll(".form-box, .form-step").forEach(el => {
+    el.classList.remove("active");
+  });
+}
+
+
+function switchToLogin() {
+  hideAllBoxes();
+  document.getElementById("loginBox").classList.add("active");
+}
+
+
+function goToreRisterStep1() {
+  hideAllBoxes();
+  document.getElementById("registerBox").classList.add("active");
+  document.getElementById("registerStep1").classList.add("active");
+}
+
+function goRegisterStep2() {
+  document.getElementById("registerStep1").classList.remove("active");
+  document.getElementById("registerStep2").classList.add("active");
+}
+
+
+function goToForgotStep1() {
+  hideAllBoxes();
+  document.getElementById("forgotBox").classList.add("active");
+  document.getElementById("forgotStep1").classList.add("active");
+}
+
+function goForgotStep2() {
+  document.getElementById("forgotStep1").classList.remove("active");
+  document.getElementById("forgotStep2").classList.add("active");
+}
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+    /* ================= Firebase 初始化 ================= */
+    if (!firebase.apps.length) {
+        firebase.initializeApp({
+        apiKey: "AIzaSyDQIC_jH4wQguSTnvmy2gdl3TyJcO-lXME",
+        authDomain: "shopping-54704.firebaseapp.com",
+        projectId: "shopping-54704",
+        });
+    }
+
+    const auth = firebase.auth();
+
+    /* ================= Email / 密碼登入 ================= */
+    document.getElementById("email-login-btn").onclick = async () => {
+    hideError("login-error");
+
+    const emailInput = document.querySelector("input[name='account']");
+    const passwordInput = document.querySelector("input[name='password']");
+    
+    emailInput.classList.remove("input-error");
+    passwordInput.classList.remove("input-error");
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+        showError("login-error", "請輸入帳號與密碼");
+        emailInput.classList.add("input-error");
+        passwordInput.classList.add("input-error");
+        return;
+    }
+
+    try {
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+        window.location.href = "/GGshopping/";
+    } catch (err) {
+        showError("login-error", firebaseErrorToMessage(err));
+        emailInput.classList.add("input-error");
+        passwordInput.classList.add("input-error");
+    }
+    };
+  
+
+  /* ================= Google 登入 ================= */
+const googleBtn = document.querySelector(".social-btn img[src*='google']")?.parentElement;
+
+if (googleBtn) {
+  googleBtn.addEventListener("click", async () => {
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    provider.setCustomParameters({
+      prompt: "select_account"
+    });
+
+    try {
+      await auth.signInWithPopup(provider);
+      window.location.replace("/GGshopping/");
+      return;
+
+    } catch (err) {
+
+      if (err.code === "auth/account-exists-with-different-credential") {
+
+        const pendingCred = err.credential;
+        const email = err.customData.email;
+
+        try {
+          const methods = await auth.fetchSignInMethodsForEmail(email);
+
+          if (methods.includes("password")) {
+
+            if (!confirm("此 Email 已註冊，是否要合併帳號？")) return;
+
+            const password = prompt("請輸入原本帳號的密碼");
+            if (!password) return;
+
+            const userCred = await auth.signInWithEmailAndPassword(email, password);
+            await userCred.user.linkWithCredential(pendingCred);
+
+            alert("帳號已成功合併，請重新登入");
+            window.location.replace("/GGshopping/");
+            return;
+          }
+
+        } catch (e) {
+          alert("合併失敗，密碼錯誤或帳號異常");
+          window.location.reload();
+          return;
+        }
+
+      } else {
+        showError("login-error", "Google 登入失敗");
+      }
+    }
+  });
+}
+
+  /* ================= LINE 登入 ================= */
+  const lineBtn = document.querySelector(".social-btn img[src*='line']")?.parentElement;
+
+  if (lineBtn) {
+    lineBtn.addEventListener("click", () => {
+     
+      window.location.href = "/api/auth/line/login/";
+    });
+  }
+
+});
+</script>
+
+<script>
+document.getElementById("register-btn").onclick = async () => {
+  const email = document.getElementById("regEmail").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+  const password = document.querySelector("#registerStep2 input[name='password']").value;
+  const password2 = document.querySelector("#registerStep2 input[name='password2']").value;
+
+  if (!email || !phone || !password || !password2) {
+    alert("請填寫完整資料");
+    return;
+  }
+
+  if (password !== password2) {
+    alert("密碼不一致");
+    return;
+  }
+
+  try {
+   
+    const cred = await firebase.auth()
+      .createUserWithEmailAndPassword(email, password);
+
+    const user = cred.user;
+
+   
+    await firebase.firestore()
+      .collection("users")
+      .doc(user.uid)
+      .set({
+        uid: user.uid,
+        email: email,
+        name: "",
+        phone: phone,
+        address: "",
+        birthday: "",
+        gender: "",
+        provider: "password",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    
+    window.location.href = "/GGshopping/";
+
+  } catch (e) {
+    alert("註冊失敗：" + e.message);
+  }
+};
+</script>
+
+
+<script>
+
+document.getElementById("forgot-btn").onclick = async () => {
+  const email = document.getElementById("forgotAccount").value.trim();
+  if (!email) {
+    alert("請輸入 Email");
+    return;
+  }
+
+  const res = await fetch("/api/forgot/send-code/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById("forgotStep1").classList.remove("active");
+    document.getElementById("forgotStep2").classList.add("active");
+  } else {
+    alert(data.message || "Email 不存在");
+  }
+};
+
+
+document.getElementById("forgot-confirm-btn").onclick = async () => {
+  const email = document.getElementById("forgotAccount").value.trim();
+  const code = document.getElementById("forgotCode").value.trim();
+
+  if (!code) {
+    alert("請輸入驗證碼");
+    return;
+  }
+
+  const res = await fetch("/api/forgot/verify-code/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById("forgotStep2").classList.remove("active");
+    document.getElementById("resetPasswordBox").classList.add("active");
+  } else {
+    alert("驗證碼錯誤");
+  }
+};
+
+
+document.getElementById("reset-password-btn").onclick = async () => {
+  const email = document.getElementById("forgotAccount").value.trim();
+  const p1 = document.getElementById("newPwd").value.trim();
+  const p2 = document.getElementById("newPwd2").value.trim();
+
+  if (!p1 || !p2) {
+    alert("請輸入密碼");
+    return;
+  }
+  if (p1 !== p2) {
+    alert("密碼不一致");
+    return;
+  }
+
+  const res = await fetch("/api/forgot/reset-password/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password: p1 })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    alert("密碼重設成功，請重新登入");
+    switchToLogin();
+  } else {
+    alert("重設失敗");
+  }
+};
+</script>
+
 {% endblock %}
 

@@ -1,354 +1,247 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from datetime import datetime
-from myapp.models import *
-from django.forms.models import model_to_dict
-
-# Create your views here.
-
-    
-def GGshopping(request):
-    # return HttpResponse("hello")
-    return render(request,'GGshopping.html',locals())
-
-def news(request):
-    return render(request,'news.html',locals())
-
-def news_detail_1(request):
-    return render(request, 'news_detail_1.html')
-
-def news_detail_2(request):
-    return render(request, 'news_detail_2.html')
-
-
-def shop(request):
-    return render(request,'shop.html',locals())
-
-def about(request):
-    return render(request,'about.html',locals())
-
-def contact(request):
-    return render(request,'contact.html',locals())
-
-def product(request):
-    return render(request,'product.html',locals())
-
-
-
-import random
+from django.shortcuts import render , redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+import json
+import random
+import requests
+from firebase_admin import firestore
+from .firebase_init import db
+from .auth_utils import get_uid_from_request
+from django.views.decorators.csrf import csrf_exempt
+from firebase_admin import auth as firebase_auth
+def GGshopping(request):
+    return render(request, "GGshopping.html")
+
+def news(request):
+    return render(request, "news.html")
+
+def news_detail_1(request):
+    return render(request, "news_detail_1.html")
+
+def news_detail_2(request):
+    return render(request, "news_detail_2.html")
+
+def shop(request):
+    return render(request, "shop.html")
+
+def about(request):
+    return render(request, "about.html")
+
+def contact(request):
+    return render(request, "contact.html")
+
+def product(request):
+    return render(request, "product.html")
+
+def login_page(request):
+    return render(request, "login.html")
+
+def line_login(request):
+    # 這裡你應該已經拿到 LINE userId / email
+    line_user_id = "LINE_USER_ID"
+    email = "line_user@email.com"
+
+    uid = f"line:{line_user_id}"
+
+    try:
+        firebase_auth.get_user(uid)
+    except:
+        firebase_auth.create_user(uid=uid, email=email)
+
+    token = firebase_auth.create_custom_token(uid)
+
+    return redirect(f"/login/line/callback/?token={token.decode()}")
+
+def line_callback(request):
+    return render(request, "line_callback.html")
+def api_profile(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    doc = db.collection("users").document(uid).get()
+    if not doc.exists:
+        return JsonResponse({"error": "User not found"}, status=404)
+
+    return JsonResponse(doc.to_dict())
+
 
 @require_POST
-def send_register_code(request):
-    phone = request.POST.get('phone')
-    email = request.POST.get('email')
+def api_profile_update(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
 
-    if not phone and not email:
-        return JsonResponse({'success': False, 'message': '缺少手機或 Email'})
+    body = json.loads(request.body)
 
-    code = str(random.randint(100000, 999999))
-
-    # 存進 session
-    request.session['register_code'] = code
-    request.session['register_phone'] = phone
-    request.session['register_email'] = email
-
-    # TODO: 寄送簡訊 / Email
-    print('驗證碼:', code)
-
-    return JsonResponse({'success': True})
-
-from django.contrib.auth.models import User
-
-from django.contrib import messages
-from django.shortcuts import redirect
-
-@require_POST
-def confirm_register(request):
-    code = request.POST.get('code')
-    password = request.POST.get('password')
-    password2 = request.POST.get('password2')
-
-    if password != password2:
-        messages.error(request, '兩次密碼不一致')
-        return redirect('login')
-
-    session_code = request.session.get('register_code')
-    email = request.session.get('register_email')
-
-    if not session_code or code != session_code:
-        messages.error(request, '驗證碼錯誤')
-        return redirect('login')
+    db.collection("users").document(uid).set(body, merge=True)
+    return JsonResponse({"success": True})
+@csrf_exempt
+def api_forgot_send_code(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False}, status=405)
+    
+    body = json.loads(request.body)
+    email = body.get("email")
 
     if not email:
-        messages.error(request, '註冊資料遺失，請重新發送驗證碼')
-        return redirect('login')
+        return JsonResponse({"success": False, "message": "缺少 Email"})
 
-    if User.objects.filter(username=email).exists():
-        messages.error(request, '帳號已存在')
-        return redirect('login')
-
-    User.objects.create_user(username=email, email=email, password=password)
-
-    # 清 session（不要 flush，避免把其他 session 都清掉）
-    for k in ['register_code', 'register_phone', 'register_email']:
-        request.session.pop(k, None)
-
-    messages.success(request, '註冊成功，請登入')
-    return redirect('login')
-
-
-@require_POST
-def forgot_send_code(request):
-    account = request.POST.get('account')
-
-    user = User.objects.filter(username=account).first()
-    if not user:
-        return JsonResponse({'success': False, 'message': '帳號不存在'})
+    users = list(db.collection("users").where("email", "==", email).stream())
+    if not users:
+        return JsonResponse({"success": False, "message": "Email 不存在"})
 
     code = str(random.randint(100000, 999999))
-    request.session['forgot_code'] = code
-    request.session['forgot_user_id'] = user.id
+    users[0].reference.update({"resetCode": code})
 
-    print('忘記密碼驗證碼:', code)
-    return JsonResponse({'success': True})
+    # 🔥 呼叫 Firebase Cloud Function（sendResetCode）
+    requests.post(
+        "https://us-central1-shopping-54704.cloudfunctions.net/sendResetCode",
+        json={
+            "data": {
+                "email": email,
+                "code": code
+            }
+        },
+        headers={"Content-Type": "application/json"}
+    )
+
+    return JsonResponse({"success": True})
+@csrf_exempt
+def api_forgot_verify_code(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False}, status=405)
+
+    body = json.loads(request.body)
+    email = body.get("email")
+    code = body.get("code")
+
+    users = db.collection("users").where("email", "==", email).stream()
+    users = list(users)
+
+    if not users:
+        return JsonResponse({"success": False})
+    
+    if code == users[0].to_dict().get("resetCode"):
+        return JsonResponse({"success": True})
+    else:
+        return JsonResponse({"success": False})
+@csrf_exempt
+def api_forgot_reset_password(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False}, status=405)
+
+    body = json.loads(request.body)
+    email = body.get("email")
+    new_password = body.get("password")
+
+    if not email or not new_password:
+        return JsonResponse({"success": False})
+
+    try:
+        user = firebase_auth.get_user_by_email(email)
+    except firebase_auth.UserNotFoundError:
+        return JsonResponse({"success": False, "message": "User not found"})
+
+    firebase_auth.update_user(
+        user.uid,
+        password=new_password
+    )
+
+    users = list(db.collection("users").where("email", "==", email).stream())
+    if users:
+        users[0].reference.update({"resetCode": ""})
+
+    return JsonResponse({"success": True})
+# 購物車頁面
+def cart_page(request):
+    return render(request,"cart.html")
+
+def api_cart(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    docs = (
+        db.collection("users")
+        .document(uid)
+        .collection("cart")
+        .stream()
+    )
+
+    return JsonResponse(
+        [{**doc.to_dict(), "id": doc.id} for doc in docs],
+        safe=False
+    )
 
 
 @require_POST
-def forgot_confirm(request):
-    code = request.POST.get('code')
-    password = request.POST.get('password')
-    password2 = request.POST.get('password2')
+def api_cart_add(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
 
-    if password != password2:
-        messages.error(request, '兩次密碼不一致')
-        return redirect('login')
+    item = json.loads(request.body)
 
-    if code != request.session.get('forgot_code'):
-        messages.error(request, '驗證碼錯誤')
-        return redirect('login')
+    db.collection("users").document(uid).collection("cart").add(item)
+    return JsonResponse({"success": True})
 
-    user_id = request.session.get('forgot_user_id')
-    if not user_id:
-        messages.error(request, '資料遺失，請重新發送驗證碼')
-        return redirect('login')
 
-    user = User.objects.get(id=user_id)
-    user.set_password(password)
-    user.save()
+@require_POST
+def api_cart_delete(request, cart_id):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
 
-    for k in ['forgot_code', 'forgot_user_id']:
-        request.session.pop(k, None)
+    db.collection("users") \
+        .document(uid) \
+        .collection("cart") \
+        .document(cart_id) \
+        .delete()
 
-    messages.success(request, '密碼已重設，請登入')
-    return redirect('login')
+    return JsonResponse({"success": True})
 
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login as auth_login
-from django.contrib import messages
 
-def login_view(request):
-    if request.method == 'POST':
-        account = request.POST.get('account')
-        password = request.POST.get('password')
+@require_POST
+def api_order_submit(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
 
-        user = authenticate(request, username=account, password=password)
+    cart_ref = db.collection("users").document(uid).collection("cart")
+    cart_docs = cart_ref.stream()
 
-        if user is None:
-            messages.error(request, '帳號或密碼錯誤')
-            return redirect('login')
-
-        auth_login(request, user)
-        messages.success(request, '登入成功')
-        return redirect('/')
-
-    return render(request, 'login.html')
-
-from django.shortcuts import render, redirect
-
-def cart_add(request):
-    if request.method != "POST":
-        return redirect("/")
-
-    sku = request.POST.get("sku")
-    title = request.POST.get("title")
-    if not sku or not title:
-        return redirect("/product/")  # 或 redirect("/")
-    price = int(request.POST.get("price", 0))
-    image = request.POST.get("image")
-    size = request.POST.get("size")
-
-    qty_str = request.POST.get("qty", "1")
-    try:
-        qty = int(qty_str)
-    except ValueError:
-        qty = 1
-
-    cart = request.session.get("cart", {})
-
-    if sku in cart:
-        cart[sku]["qty"] += qty
-    else:
-        cart[sku] = {
-            "sku": sku,
-            "title": title,
-            "price": price,
-            "qty": qty,
-            "size": size,
-            "image": image,
-        }
-
-    request.session["cart"] = cart
-    request.session.modified = True
-
-    return redirect("/cart/")
-
-
-def cart_view(request):
-    cart = request.session.get("cart", {})
+    items = []
     total = 0
 
-    for item in cart.values():
-        item["subtotal"] = item["price"] * item["qty"]
-        total += item["subtotal"]
+    for doc in cart_docs:
+        item = doc.to_dict()
+        items.append(item)
+        total += item["price"] * item["quantity"]
 
-    return render(request, "cart.html", {
-        "cart": cart,
-        "total": total
+    if not items:
+        return JsonResponse({"error": "Cart empty"}, status=400)
+
+    db.collection("orders").add({
+        "uid": uid,
+        "items": items,
+        "total": total,
+        "createdAt": firestore.SERVER_TIMESTAMP
     })
 
-def cart_clear(request):
-    request.session.pop("cart", None)
-    return redirect("/cart/")
+   
+    for doc in cart_ref.stream():
+        doc.reference.delete()
 
-from django.shortcuts import redirect
-
-def cart_inc(request, key):
-    cart = request.session.get("cart", {})
-    if key in cart:
-        cart[key]["qty"] += 1
-        request.session["cart"] = cart
-        request.session.modified = True
-    return redirect("/cart/")
-
-def cart_dec(request, key):
-    cart = request.session.get("cart", {})
-    if key in cart:
-        cart[key]["qty"] -= 1
-        if cart[key]["qty"] <= 0:
-            del cart[key]
-        request.session["cart"] = cart
-        request.session.modified = True
-    return redirect("/cart/")
-
-def cart_remove(request, key):
-    cart = request.session.get("cart", {})
-
-    if key in cart:
-        del cart[key]
-        request.session["cart"] = cart
-        request.session.modified = True
-
-    return redirect("/cart/")
-
-from django.contrib.auth.decorators import login_required
-
-@login_required(login_url="/login/")
-def checkout_view(request):
-    cart = request.session.get("cart",{})
-
-    if not cart:
-        return redirect("/cart/")
-    
-    total = 0
-    for item in cart.values():
-        item["subtotal"] = item["price"] * item["qty"]
-        total += item["subtotal"]
-
-    return render(request, "checkout.html", {
-        "cart": cart,
-        "total": total
-    })
-
-from .models import Order, OrderItem
-from django.contrib.auth.decorators import login_required
-@login_required(login_url="/login/")
-def order_submit(request):
-    if request.method == "POST":
-        cart = request.session.get("cart", {})
-
-        if not cart:
-            return redirect("/cart/")
-
-        total = 0
-        for item in cart.values():
-            total += item["price"] * item["qty"]
-
-        order = Order.objects.create(
-            user=request.user,
-            total=total
-        )
-
-        for item in cart.values():
-            OrderItem.objects.create(
-                order=order,
-                title=item["title"],
-                size=item["size"],
-                price=item["price"],
-                qty=item["qty"]
-            )
-
-        request.session.pop("cart", None)
-
-        return render(request, "order_success.html", {
-            "order": order
-        })
-    
-@login_required(login_url="/login/")
-def order_list(request):
-    orders = Order.objects.filter(user=request.user).order_by("-created_at")
-    return render(request, "orders.html", {
-        "orders": orders
-    })
-
-from django.contrib.auth import logout
-from django.shortcuts import redirect
-
-def logout_view(request):
-    logout(request)
-
-    # 清除所有殘留 messages
-    storage = messages.get_messages(request)
-    for _ in storage:
-        pass
-
-    return redirect('login')
+    return JsonResponse({"success": True})
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
+def api_orders(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
 
-@login_required(login_url='login')
-def profile(request):
-    user = request.user
-
-    if request.method == 'POST':
-        display_name = request.POST.get('display_name')
-
-        if not display_name:
-            messages.error(request, '使用者名稱不能為空')
-            return redirect('profile')
-
-        user.first_name = display_name   
-        user.save()
-
-        messages.success(request, '會員資料已更新')
-        return redirect('profile')
-
-    return render(request, 'profile.html', {
-        'user': user
-    })
+    docs = db.collection("orders").where("uid", "==", uid).stream()
+    return JsonResponse([doc.to_dict() for doc in docs], safe=False)

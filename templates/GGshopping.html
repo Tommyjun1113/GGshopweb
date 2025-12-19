@@ -59,22 +59,19 @@
   </header>
 
   <!-- ================= 右上角會員 / 購物車 ================= -->
-  <div class="top-right-icons">
-    {% if user.is_authenticated %}
-      <span class="welcome-text">👋 {{ user.username }}</span>
-      <a href="{% url 'logout' %}" class="logout-link">登出</a>
-    {% else %}
-      <a href="{% url 'login' %}">
-        <img src="{% static 'member.jpg' %}" width="35" alt="登入">
-      </a>
-    {% endif %}
 
-    <a href="/cart/" class="cart-icon">
-      <img src="{% static 'shopping-cart.jpg' %}" width="35" alt="購物車">
-      {% if cart_count %}
-        <span class="cart-badge">{{ cart_count }}</span>
-      {% endif %}
+  <div class="top-right-icons">
+    <div id="member-area">
+    <a href="/login/" id="login-btn">
+      <img src="{% static 'member.jpg' %}" width="35" alt="登入">
     </a>
+  </div>
+
+  <!-- 購物車 -->
+  <a href="/cart/" class="cart-icon position-relative">
+    <img src="{% static 'shopping-cart.jpg' %}" width="35" alt="購物車">
+    <span id="cart-badge" class="cart-badge d-none">0</span>
+  </a>
   </div>
 
   <!-- ================= 新會員 Banner ================= -->
@@ -135,7 +132,82 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQIC_jH4wQguSTnvmy2gdl3TyJcO-lXME",
+      authDomain: "shopping-54704.firebaseapp.com",
+      projectId: "shopping-54704",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+  </script>
+  <script>
+    auth.onAuthStateChanged(async (user) => {
+      const memberArea = document.getElementById("member-area");
+
+      if (user) {
+        const uid = user.uid;
+        const userData = {
+          uid: uid,
+          email: user.email || "",
+          name: user.displayName || "",  
+          provider: user.providerData.map(p => p.providerId).join(","),
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+      
+        await firebase.firestore()
+          .collection("users")
+          .doc(uid)
+          .set(userData, { merge: true });
+
+        
+        const snap = await firebase.firestore()
+          .collection("users")
+          .doc(uid)
+          .get();
+
+        const data = snap.exists ? snap.data() : userData;
+
+        memberArea.innerHTML = `
+          <span class="welcome-text">👋 ${data.name || data.email}</span>
+          <a href="#" id="logout-btn" class="logout-link">登出</a>
+        `;
+
+        document.getElementById("logout-btn").onclick = () => auth.signOut();
+
+      
+        const token = await user.getIdToken();
+        fetch("/api/cart/", {
+          headers: {
+            "Authorization": "Bearer " + token
+          }
+        })
+        .then(res => res.json())
+        .then(cart => {
+          if (cart.length > 0) {
+            const badge = document.getElementById("cart-badge");
+            badge.classList.remove("d-none");
+            badge.innerText = cart.length;
+          }
+        });
+
+      } else {
+        memberArea.innerHTML = `
+          <a href="/login/">
+            <img src="{% static 'member.jpg' %}" width="35" alt="登入">
+          </a>
+        `;
+
+        document.getElementById("cart-badge").classList.add("d-none");
+      }
+    });
+  </script>
   {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>

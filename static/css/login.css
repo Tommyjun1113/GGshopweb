@@ -46,6 +46,30 @@
     border-bottom: 1px solid #1f4f7c;
 }
 
+.login-error {
+  display: none;
+  margin: 12px 0 18px;
+  padding: 10px 14px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  line-height: 1.4;
+  color: #b42318;
+
+  background-color: #fdecea;
+  border: 1px solid #f5c2c7;
+
+  align-items: center;
+  gap: 8px;
+}
+.login-error::before {
+  content: "⚠️";
+  font-size: 16px;
+}
+.input-error {
+  border-bottom: 2px solid #e53935 !important;
+}
+
 /* 幫助提示 */
 .helper-text {
     font-size: 14px;

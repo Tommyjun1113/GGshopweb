@@ -1,14 +1,14 @@
 /* =================================================
    平板（<=992px）
 ================================================= */
-@media (max-width: 992px) {
+@media (min-width:769px) and (max-width: 992px) {
 
   .content {
     padding: 0 40px;
   }
   /* ===== 商品列表 ===== */
   .product-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
   /* ===== 購物車 ===== */
@@ -25,6 +25,9 @@
   .main-wrapper {
     grid-template-columns: 1fr;
     grid-auto-rows: auto;
+  }
+  .info-panel {
+    justify-self: stretch;
   }
   .left-panel {
     grid-row: 1;
@@ -48,7 +51,8 @@
   }
 
   .image-panel {
-    grid-row: 2;
+    max-width: 100%;
+    margin: 0 auto;
   }
 
   .info-panel {
@@ -66,7 +70,60 @@
     width: 100%;
     height: 300px;
   }
-  
+  .page-layout{
+    display: flex;
+    margin-top:  0 !important;
+    padding-top: 24px;
+    align-items: flex-start;   
+    gap: 32px;
+  }
+  .sidebar-menu{
+    width: 240px;
+    flex: 0 0 240px;
+  }
+  .sidebar-menu .menu-item{
+    padding: 20px;
+  }
+  .menu-title{
+    text-align: left;
+    margin-bottom: 16px;
+  }
+  .menu-title a{
+    display: block;
+    font-size: 18px;
+    font-weight: 800;
+    color: #000 !important;
+    text-decoration: none;
+  }
+  .submenu{
+    display: flex !important;              
+    flex-direction: column !important;
+    justify-content: left !important;
+    gap: 12px !important;
+    width: 200px !important;
+    padding: 0 0 0 0 !important;
+    margin: 0 !important;
+  }
+  .submenu a{
+    display: flex !important;
+    justify-content: center !important;  
+    align-items: center !important;      
+
+    height: 44px;
+    width: 100%;              
+    background: #000;
+    color: #fff !important;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .submenu a:hover,
+  .submenu a.active{
+    background: #000;
+  }
+  .shop-content h2{
+    margin-top: 0;
+  }
 }
 
 
@@ -116,68 +173,108 @@
     width: 100%;
     object-fit: cover;
   }
+
   .page-layout {
-    flex-direction: column;
-    gap: 24px;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    box-sizing: border-box !important;
   }
+  .page-layout.container {
+    max-width: 100% !important;
+    padding: 0 16px !important;
+  } 
+
   .sidebar-menu {
-    width: 100%;
+    width: 100% !important;
+    margin: 0 0 20px 0 !important;
   }
+
   .sidebar-menu .menu-item {
-    padding: 16px;
-    border-radius: 14px;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 18px 16px !important;
+    background: #fafafa !important;
+    border-radius: 16px !important;
+  }
+
+  .menu-title {
+    text-align: center !important;
+    margin-bottom: 14px !important;
   }
 
   .menu-title a {
-    font-size: 18px;
-    margin-bottom: 12px;
-    text-align: left;
+    color: #000 !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
   }
+
   .submenu {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    display: flex !important;
+    gap: 12px !important;
+    width: 100% !important;
   }
 
   .submenu li {
-    margin: 0;
-    flex-shrink: 0;
+    flex: 1 1 0 !important;    
+    margin: 0 !important;
   }
 
   .submenu a {
-    white-space: nowrap;
-    padding: 10px 16px;
-    font-size: 15px;
-    border-radius: 999px;
-    background: #f2f2f2;
+    display: block !important;
+    width: 100% !important;
+    padding: 12px 0 !important;
+    text-align: center !important;
+
+    background: #000 !important;
+    color: #fff !important;
+    border-radius: 12px !important;
+    text-decoration: none !important;
+
+    white-space: nowrap !important;
   }
 
-  .submenu a:hover {
+  .submenu a:hover{
+    background: #ddd;
+  }
+
+  .submenu a.active {
     background: #000;
     color: #fff;
+    font-weight: 600;
   }
   .shop-content h2 {
     font-size: 22px;
-    margin: 12px 0 20px;
+    margin: 12px 0 16px;
   }
+
   .product-grid {
-    grid-template-columns: repeat(2, 1fr);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
   }
   .product-card {
-    border-radius: 18px;
-    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    border-radius: 14px;
   }
 
   .product-info {
-    padding: 16px;
+    padding: 10px 12px;
   }
 
   .product-title {
-    font-size: 16px;
+    font-size: 14px;
+    min-height: 38px;
   }
 
   .product-price {
-    font-size: 18px;
+    font-size: 16px;
   }
   
 }
@@ -219,7 +316,8 @@
     width: 24px;
     height: 24px;
   }
-  .product-grid {
-    grid-template-columns: 1fr;
+  .shop-content .product-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
   }
 }

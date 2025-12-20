@@ -91,28 +91,17 @@
     <!-- 商品描述 -->
     <div class="desc-wrapper">
 
-      <div class="desc-header" onclick="toggleDesc()">
+      <div class="desc-header" id="descHeader">
         <span>商品描述</span>
         <span id="descToggle" class="toggle-btn">+</span>
       </div>
 
       <div id="descContent" class="desc-content hidden">
-
-        <p class="desc-highlight">版型偏小，建議大半號購買。</p>
-
+        <p class="desc-highlight" id="descHighlight"></p>
         <h3>Detail</h3>
-        <ul class="desc-list">
-          <li>皮革鞋面搭配沖孔鞋頭設計，舒適又透氣。</li>
-          <li>採用 Nike Air 緩震系統，提供全天候的輕量舒適感。</li>
-          <li>橡膠外底打造卓越抓地力與耐久性。</li>
-        </ul>
-
+        <ul class="desc-list" id="descDetailList"></ul>
         <h3>⚠️ 商品注意事項 ⚠️</h3>
-        <ul class="desc-list">
-          <li>預購商品以實際到貨時間為準。</li>
-          <li>GGSHOP 保留訂單更改之權利。</li>
-        </ul>
-
+        <ul class="desc-list" id="descNoticeList"></ul>
       </div>
     </div>
 

@@ -200,7 +200,7 @@ window.productsData = [
       title: "ADIDAS 球鞋（綠色）",
       price: 1990,
       images: [
-        "/static/adiproductsdas/green1.png",
+        "/static/products/green1.png",
         "/static/products/green2.png"
       ],
       description: "綠色 ADIDAS 球鞋，亮眼風格。",

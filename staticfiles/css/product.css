@@ -230,45 +230,52 @@ body {
 .hidden {
     display: none;
 }
+
+
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 28px;
   width: 100%;
 }
+
 
 .product-card {
   background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .product-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
 }
 
-/* 商品圖片 */
-.product-grid img {
+
+.product-card img {
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 8px;
   display: block;
 }
 
-/* 商品資訊 */
+
 .product-info {
-  padding: 10px 5px;
+  padding: 14px 16px;
 }
+
 
 .product-title {
   font-size: 15px;
-  color: #222;
   font-weight: 500;
-  margin: 10px 0 8px;
-  min-height: 48px;
+  color: #222;
+  margin-bottom: 8px;
   line-height: 1.4;
+  min-height: 42px;
 }
+
 
 .product-price {
   font-size: 18px;

@@ -269,10 +269,11 @@ function goForgotStep2() {
 
       const provider = new firebase.auth.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
+      await auth.signInWithRedirect(provider);
 
       try {
         // ① 直接嘗試 Google 登入
-        await auth.signInWithPopup(provider);
+        await auth.signInWithRedirect(provider);
 
         // ✅ 成功直接回首頁
         window.location.href = "/GGshopping/";

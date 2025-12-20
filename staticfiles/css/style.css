@@ -116,6 +116,16 @@
     width: 100%;
     object-fit: cover;
   }
+  .page-layout {
+    flex-direction: column;
+  }
+  .sidebar-menu {
+    width: 100%;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 
@@ -154,5 +164,8 @@
   .social-btn img {
     width: 24px;
     height: 24px;
+  }
+  .product-grid {
+    grid-template-columns: 1fr;
   }
 }

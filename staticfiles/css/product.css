@@ -3,21 +3,6 @@ body {
     font-family: "Noto Sans TC", sans-serif;
     background: #f2f2f2;
 }
-
-/* 整體三欄布局 */
-.main-wrapper {
-    display: grid;
-    grid-template-columns: 120px 1fr 420px; /* 左、中、右 */
-    gap: 30px;
-    padding: 30px 40px;
-}
-
-/* 左側欄 */
-.left-panel {
-    display: flex;
-    flex-direction: column;
-}
-
 .breadcrumb {
     font-size: 14px;
     margin-bottom: 20px;
@@ -49,22 +34,6 @@ body {
 
 .thumb-item:hover img {
     transform: scale(1.05);
-}
-
-/* 主圖區 */
-.image-panel {
-    display: flex;
-    justify-content: center;
-    
-    width: 100%;
-}
-
-/* 主圖片自適應視窗大小 */
-.main-image {
-    width: 100%;         /* ⭐ 讓圖片寬度跟著中間欄位變化 */
-    height: auto;        /* 保持比例 */
-    max-height: 90vh;    /* ⭐ 不超過可視高度 */
-    object-fit: contain; /* 不裁切，完整顯示圖片 */
 }
 
 /* 右側資訊 */
@@ -229,63 +198,4 @@ body {
 
 .hidden {
     display: none;
-}
-
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 28px;
-  width: 100%;
-}
-
-
-.product-card {
-  background: #fff;
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
-}
-
-
-.product-card img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  display: block;
-}
-
-
-.product-info {
-  padding: 14px 16px;
-}
-
-
-.product-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #222;
-  margin-bottom: 8px;
-  line-height: 1.4;
-  min-height: 42px;
-}
-
-
-.product-price {
-  font-size: 18px;
-  font-weight: 700;
-  color: #d33;
-}
-
-.product-old-price {
-  font-size: 14px;
-  color: #999;
-  text-decoration: line-through;
-  margin-top: 4px;
 }

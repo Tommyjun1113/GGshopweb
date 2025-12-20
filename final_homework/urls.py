@@ -31,7 +31,8 @@ urlpatterns = [
     path('product/', views.product),
     
     path("login/", views.login_page, name="login"),
-    path("login/line/callback/",views.line_callback),
+    path("api/auth/line/login/", views.line_login),
+    path("api/auth/line/callback/", views.line_callback),
 
     path("api/profile/", views.api_profile),
     path("api/profile/update/", views.api_profile_update),

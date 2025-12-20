@@ -91,15 +91,6 @@
     padding: 12px 0;
     text-align: center;
   }
-
-  .top-right-icons {
-    position: absolute;
-    right: 12px;
-    top: 14px;
-    display: flex;
-    gap: 14px;
-  }
-
   /* 黑底 MENU 列 */
   nav {
     background: #000;

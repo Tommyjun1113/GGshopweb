@@ -54,7 +54,7 @@
             <button class="social-btn line" type="button">
                 <img src="{% static 'icons/line.svg' %}">
             </button>
-            <button class="social-btn" type="button">
+            <button id="google-login-btn"class="social-btn" type="button">
                 <img src="{% static 'icons/google.svg' %}">
             </button>
         </div>
@@ -218,7 +218,7 @@ function goForgotStep2() {
 }
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", () => {
     /* ================= Firebase 初始化 ================= */
     if (!firebase.apps.length) {
         firebase.initializeApp({
@@ -258,64 +258,65 @@ function goForgotStep2() {
         emailInput.classList.add("input-error");
         passwordInput.classList.add("input-error");
     }
-    };
+  };
   
-
   /* ================= Google 登入 ================= */
-const googleBtn = document.querySelector(".social-btn img[src*='google']")?.parentElement;
+  const googleBtn = document.getElementById("google-login-btn");
 
-if (googleBtn) {
-  googleBtn.addEventListener("click", async () => {
-    const auth = firebase.auth();
-    const provider = new firebase.auth.GoogleAuthProvider();
+  if (googleBtn) {
+    googleBtn.addEventListener("click", async () => {
+      hideError("login-error");
 
-    provider.setCustomParameters({
-      prompt: "select_account"
-    });
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
 
-    try {
-      await auth.signInWithPopup(provider);
-      window.location.replace("/GGshopping/");
-      return;
+      try {
+        // ① 直接嘗試 Google 登入
+        await auth.signInWithPopup(provider);
 
-    } catch (err) {
+        // ✅ 成功直接回首頁
+        window.location.href = "/GGshopping/";
+        return;
 
-      if (err.code === "auth/account-exists-with-different-credential") {
+      } catch (err) {
+        console.error("Google login error:", err);
 
-        const pendingCred = err.credential;
-        const email = err.customData.email;
+        // ② 帳號已存在 → 合併流程
+        if (err.code === "auth/account-exists-with-different-credential") {
+          const pendingCred = err.credential;
+          const email = err.customData.email;
 
-        try {
-          const methods = await auth.fetchSignInMethodsForEmail(email);
+          try {
+            const methods = await auth.fetchSignInMethodsForEmail(email);
 
-          if (methods.includes("password")) {
+            if (methods.includes("password")) {
+              const password = prompt("此 Email 已存在，請輸入原本密碼以合併帳號");
+              if (!password) return;
 
-            if (!confirm("此 Email 已註冊，是否要合併帳號？")) return;
+              const userCred =
+                await auth.signInWithEmailAndPassword(email, password);
 
-            const password = prompt("請輸入原本帳號的密碼");
-            if (!password) return;
+              // 🔥 合併帳號（關鍵）
+              await userCred.user.linkWithCredential(pendingCred);
 
-            const userCred = await auth.signInWithEmailAndPassword(email, password);
-            await userCred.user.linkWithCredential(pendingCred);
+              alert("帳號合併成功！");
+              window.location.href = "/GGshopping/";
+              return;
+            }
 
-            alert("帳號已成功合併，請重新登入");
-            window.location.replace("/GGshopping/");
-            return;
+            alert("此帳號已用其他方式註冊，請使用原登入方式");
+
+          } catch (mergeErr) {
+            console.error("Merge error:", mergeErr);
+            showError("login-error", "帳號合併失敗，請確認密碼");
           }
 
-        } catch (e) {
-          alert("合併失敗，密碼錯誤或帳號異常");
-          window.location.reload();
-          return;
+        } else {
+          showError("login-error", firebaseErrorToMessage(err));
         }
-
-      } else {
-        showError("login-error", "Google 登入失敗");
       }
-    }
-  });
-}
-
+    });
+  }
   /* ================= LINE 登入 ================= */
   const lineBtn = document.querySelector(".social-btn img[src*='line']")?.parentElement;
 
@@ -325,7 +326,6 @@ if (googleBtn) {
       window.location.href = "/api/auth/line/login/";
     });
   }
-
 });
 </script>
 

@@ -9,6 +9,8 @@ from .firebase_init import db
 from .auth_utils import get_uid_from_request
 from django.views.decorators.csrf import csrf_exempt
 from firebase_admin import auth as firebase_auth
+from django.contrib.auth import login
+from django.contrib.auth.models import User
 def GGshopping(request):
     return render(request, "GGshopping.html")
 
@@ -36,24 +38,78 @@ def product(request):
 def login_page(request):
     return render(request, "login.html")
 
+LINE_CHANNEL_ID = 2008634753
+LINE_CHANNEL_SECRET = "d417d86ac49cc7f482035a82ccc4a18d"
+LINE_REDIRECT_URI = "http://127.0.0.1:8000/api/auth/line/callback/"    # https://ggshopweb.onrender.com/api/auth/line/callback/
 def line_login(request):
-    # 這裡你應該已經拿到 LINE userId / email
-    line_user_id = "LINE_USER_ID"
-    email = "line_user@email.com"
+    line_auth_url = (
+        "https://access.line.me/oauth2/v2.1/authorize"
+        f"?response_type=code"
+        f"&client_id={LINE_CHANNEL_ID}"
+        f"&redirect_uri={LINE_REDIRECT_URI}"
+        f"&scope=profile%20openid%20email"
+        f"&state=12345"
+    )
+    return redirect(line_auth_url)
+def line_callback(request):
+    code = request.GET.get("code")
+    if not code:
+        return JsonResponse({"success": False, "error": "no code"})
+
+    # 1️⃣ 換 access token
+    token_res = requests.post(
+        "https://api.line.me/oauth2/v2.1/token",
+        data={
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": LINE_REDIRECT_URI,
+            "client_id": LINE_CHANNEL_ID,
+            "client_secret": LINE_CHANNEL_SECRET,
+        },
+    ).json()
+
+    access_token = token_res.get("access_token")
+    if not access_token:
+        return JsonResponse({"success": False, "error": "token failed"})
+
+    # 2️⃣ 取得使用者資料
+    profile = requests.get(
+        "https://api.line.me/v2/profile",
+        headers={"Authorization": f"Bearer {access_token}"}
+    ).json()
+
+    line_user_id = profile.get("userId")
+    display_name = profile.get("displayName")
+    picture_url = profile.get("pictureUrl")
+
+    if not line_user_id:
+        return JsonResponse({"success": False})
 
     uid = f"line:{line_user_id}"
 
+    # 3️⃣ 建立 Firebase 使用者（如果不存在）
     try:
         firebase_auth.get_user(uid)
     except:
-        firebase_auth.create_user(uid=uid, email=email)
+        firebase_auth.create_user(
+            uid=uid,
+            display_name=display_name,
+            photo_url = picture_url
+        ),
+    db.collection("users").document(uid).set({
+        "uid" : uid,
+        "name" : display_name,
+        "provider" : "line",
+        "photo" : picture_url,
+        "createdAt" : firestore.SERVER_TIMESTAMP,
+    }, merge=True)
+    # 4️⃣ 建立 Firebase Custom Token
+    custom_token = firebase_auth.create_custom_token(uid)
 
-    token = firebase_auth.create_custom_token(uid)
-
-    return redirect(f"/login/line/callback/?token={token.decode()}")
-
-def line_callback(request):
-    return render(request, "line_callback.html")
+    # 5️⃣ 回傳 token 給前端
+    return render(request, "line_callback.html", {
+        "firebase_token": custom_token.decode()
+    })
 def api_profile(request):
     uid = get_uid_from_request(request)
     if not uid:

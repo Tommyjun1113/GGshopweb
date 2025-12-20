@@ -44,11 +44,23 @@
 
   <!-- ================= HEADER ================= -->
   <header class="header">
+  <div class="header-top">
     <div class="logo">
       <a href="/GGshopping/">GG SHOP</a>
     </div>
-
-    <nav>
+    <div class="top-right-icons">
+      <div id="member-area">
+        <a href="/login/" id="login-btn">
+          <img src="{% static 'member.jpg' %}" width="35" alt="登入">
+        </a>
+      </div>
+        <a href="/cart/" class="cart-icon position-relative">
+          <img src="{% static 'shopping-cart.jpg' %}" width="35" alt="購物車">
+          <span id="cart-badge" class="cart-badge d-none">0</span>
+        </a>
+    </div>
+  </div>
+   <nav>
       <ul class="menu">
         <li><a href="/news/">NEWS</a></li>
         <li><a href="/shop/">SHOP</a></li>
@@ -56,19 +68,6 @@
         <li><a href="/contact/">CONTACT</a></li>
       </ul>
     </nav>
-  <div class="top-right-icons">
-      <div id="member-area">
-        <a href="/login/" id="login-btn">
-          <img src="{% static 'member.jpg' %}" width="35" alt="登入">
-        </a>
-      </div>
-
-  <!-- 購物車 -->
-        <a href="/cart/" class="cart-icon position-relative">
-          <img src="{% static 'shopping-cart.jpg' %}" width="35" alt="購物車">
-          <span id="cart-badge" class="cart-badge d-none">0</span>
-        </a>
-  </div>
 </header>
   <!-- ================= 新會員 Banner ================= -->
   {% block top_banner %}
@@ -85,15 +84,15 @@
       <div class="carousel-inner">
 
         <div class="carousel-item active">
-          <img src="{% static 'puma/puma.jpg' %}" class="d-block w-100" alt="Puma">
+          <img src="{% static 'products/puma.jpg' %}" class="d-block w-100" alt="Puma">
         </div>
 
         <div class="carousel-item">
-          <img src="{% static 'nike/nike.jpg' %}" class="d-block w-100" alt="Nike">
+          <img src="{% static 'products/nike.jpg' %}" class="d-block w-100" alt="Nike">
         </div>
 
         <div class="carousel-item">
-          <img src="{% static 'adidas/adidas.jpg' %}" class="d-block w-100" alt="Adidas">
+          <img src="{% static 'products/adidas.jpg' %}" class="d-block w-100" alt="Adidas">
         </div>
 
       </div>
@@ -157,16 +156,19 @@
         };
 
       
-        await firebase.firestore()
-          .collection("users")
-          .doc(uid)
-          .set(userData, { merge: true });
+        const ref = firebase.firestore().collection("users").doc(uid);
+        const snap = await ref.get();
 
-        
-        const snap = await firebase.firestore()
-          .collection("users")
-          .doc(uid)
-          .get();
+        if (!snap.exists) {
+          // 第一次登入才建立
+          await ref.set(userData);
+        } else {
+          // 只更新 email / provider，不動 name
+          await ref.set({
+            email: user.email || "",
+            provider: user.providerData.map(p => p.providerId).join(","),
+          }, { merge: true });
+        };
 
         const data = snap.exists ? snap.data() : userData;
 

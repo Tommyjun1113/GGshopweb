@@ -8,22 +8,37 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
+
+  
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: "AIzaSyDQIC_jH4wQguSTnvmy2gdl3TyJcO-lXME",
+      authDomain: "shopping-54704.firebaseapp.com",
+      projectId: "shopping-54704",
+    });
+  }
+
+  
+  const token = "{{ firebase_token|escapejs }}";
 
   if (!token) {
-    alert("LINE 登入失敗，缺少 token");
+    alert("LINE 登入失敗，缺少 Firebase token");
     window.location.href = "/login/";
     return;
   }
 
+  
   firebase.auth().signInWithCustomToken(token)
     .then(() => {
-      window.location.href = "/";
+      window.location.href = "/GGshopping/";
     })
     .catch(err => {
+      console.error(err);
       alert("LINE 登入失敗：" + err.message);
       window.location.href = "/login/";
     });

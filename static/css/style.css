@@ -23,52 +23,56 @@
 
   /* ===== 商品內頁 ===== */
   .main-wrapper {
-    grid-template-columns: 1fr;
-    grid-auto-rows: auto;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px;
   }
   .info-panel {
-    justify-self: stretch;
+    order: 3;
+    width: 100%;
+    padding-right: 0;
   }
   .left-panel {
-    grid-row: 1;
+    order: 2;
     width: 100%;
-    padding: 10px 0;
+    padding: 0;
   }
 
   .thumb-list {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px;
     overflow-x: auto;
-    height: 60px;
-    width: 100%;
+    width: 100% !important;
   }
 
   .thumb-item {
-    width: 50px;
-    height: 50px;
+    width: 64px;
+    height: 64px;
     flex-shrink: 0;
   }
-
-  .image-panel {
-    max-width: 100%;
-    margin: 0 auto;
+  .main-image{
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    object-fit: contain;
   }
-
-  .info-panel {
-    grid-row: 3;
-    padding-right: 0;
+  .image-panel {
+    order: 1;
+    width: 100%;
   }
 
   /* ===== About ===== */
   .about-wrapper {
-    flex-direction: column;
-    align-items: center;
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 24px;
   }
-
+  .about-text {
+    max-width: 100%;
+  }
   .about-map iframe {
-    width: 100%;
-    height: 300px;
+    max-width: 100%;
   }
   .page-layout{
     display: flex;
@@ -173,7 +177,17 @@
     width: 100%;
     object-fit: cover;
   }
-
+  .about-wrapper {
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 24px;
+  }
+  .about-text {
+    max-width: 100%;
+  }
+  .about-map iframe {
+    max-width: 100%;
+  }
   .page-layout {
     display: flex !important;
     flex-direction: column !important;
@@ -276,7 +290,65 @@
   .product-price {
     font-size: 16px;
   }
-  
+  .main-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px;
+  }
+  .left-panel {
+    width: 100%;
+    order: 2;
+    padding: 0;
+  }
+  .thumb-list {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    gap: 12px;
+    overflow-x: auto;
+  }
+  .thumb-item {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+  }
+  .image-panel {
+    width: 100%;
+    order: 1;
+  }
+  .info-panel {
+    order: 3;
+    width: 100%;
+    padding-right: 0;
+  }
+  .main-image {
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    object-fit: contain;
+  }
+  .image-panel {
+    width: 100%;
+    order: 1;
+  }
+
+  .main-image {
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    object-fit: contain;
+  }
+  .title {
+    font-size: 20px;
+  }
+
+  .new-price {
+    font-size: 22px;
+  }
+  /* 按鈕與選單滿版 */
+  .buy-btn {
+    width: 100%;
+  }
 }
 
 

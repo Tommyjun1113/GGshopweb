@@ -7,24 +7,31 @@ body {
 
 /* 資訊卡片 */
 .contact-info {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  padding: 40px 0;
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: clamp(12px, 3vw, 24px);
+  padding:clamp(20px, 5vw, 40px) 0;
+  width: 100%;
 }
 
 .card {
-  width: 250px;
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+  aspect-ratio: 3 / 4;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  transition: 0.3s;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   
+  align-items: center;
+
+  padding: clamp(12px, 4vw, 20px);
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .card p{
-    text-align: center;
+  text-align: center;
 }
 
 .card:hover {
@@ -32,8 +39,27 @@ body {
 }
 
 .icon {
-  font-size: 40px;
-  margin-bottom: 10px;
+  font-size: clamp(28px, 6vw, 40px);
+  margin-bottom: clamp(6px, 2vw, 12px);
+}
+.card h3 {
+  font-size: clamp(12px, 2.8vw, 16px);
+  line-height: 1.2;
+  min-height: 2.4em;   
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+.card p{
+  font-size: clamp(11px, 2.5vw, 14px);
+  line-height: 1.4;
+  margin: 0;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* 表單區 */
@@ -57,9 +83,12 @@ body {
   font-size: 16px;
   background: white;
 }
-
+.row{
+  width: 100%;
+  margin: 10px 0;
+}
 .row input[name="email"] {
-    flex: 1.2;
+    flex: 1;
 }
 .row input[name="phone"] {
     flex: 1;

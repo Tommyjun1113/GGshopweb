@@ -5,68 +5,81 @@ body {
   padding: 0;
 }
 
-/* 資訊卡片 */
+
 .contact-info {
   display: grid;
-  grid-template-columns: repeat(3,minmax(0,1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(12px, 3vw, 24px);
-  padding:clamp(20px, 5vw, 40px) 0;
-  width: 100%;
+
+  padding: clamp(24px, 5vw, 48px) 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
+
 
 .card {
   background: #fff;
   border-radius: 16px;
-  aspect-ratio: 3 / 4;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 
   display: flex;
   flex-direction: column;
-  justify-content: center;   
   align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 2vw, 12px);
 
-  padding: clamp(12px, 4vw, 20px);
+  padding: clamp(14px, 3.5vw, 20px);
   box-sizing: border-box;
   text-align: center;
-}
 
-.card p{
-  text-align: center;
+ 
+  min-height: clamp(160px, 30vw, 220px);
+
+  transition: transform 0.25s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
 }
+
 
 .icon {
-  font-size: clamp(28px, 6vw, 40px);
-  margin-bottom: clamp(6px, 2vw, 12px);
+  font-size: clamp(26px, 6vw, 40px);
+  line-height: 1;
 }
+
+
 .card h3 {
-  font-size: clamp(12px, 2.8vw, 16px);
-  line-height: 1.2;
-  min-height: 2.4em;   
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-}
-.card p{
-  font-size: clamp(11px, 2.5vw, 14px);
-  line-height: 1.4;
+  font-size: clamp(12px, 2.6vw, 16px);
+  font-weight: 600;
+  line-height: 1.3;
   margin: 0;
 
+  text-align: center;
+  word-break: keep-all;
+}
+
+
+.card p {
+  font-size: clamp(11px, 2.4vw, 14px);
+  line-height: 1.45;
+  margin: 0;
+
+  word-break: break-word;
+  text-align: center;
+
+  
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* 表單區 */
+
 .contact-form {
-  width: 70%;
-  max-width: 700px;
-  margin: 40px auto;
+  width: min(700px, 90%);
+  margin: 48px auto;
 }
 
 .contact-form h2 {
@@ -81,30 +94,32 @@ body {
   border-radius: 8px;
   border: 1px solid #ddd;
   font-size: 16px;
-  background: white;
+  background: #fff;
+  box-sizing: border-box;
 }
-.row{
+
+.row {
+  display: flex;
+  gap: 12px;
   width: 100%;
-  margin: 10px 0;
+  margin:10px 0;
 }
-.row input[name="email"] {
-    flex: 1;
-}
-.row input[name="phone"] {
-    flex: 1;
+
+.row input {
+  flex: 1;
 }
 
 button {
   background: #e4645c;
-  color: white;
-  padding: 12px 20px;
+  color: #fff;
+  padding: 14px 20px;
   width: 100%;
   border: none;
-  font-size: 18px;
+  font-size: 16px;
   border-radius: 10px;
   cursor: pointer;
-  margin-top: 10px;
-  transition: 0.2s;
+  margin-top: 14px;
+  transition: background 0.2s ease;
 }
 
 button:hover {

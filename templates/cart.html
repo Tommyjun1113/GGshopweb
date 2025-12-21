@@ -8,85 +8,146 @@
 {% block content %}
 <h1 class="cart-title">購物車</h1>
 
-<div id="cart-container" class="cart-container"></div>
+<div class="cart-page">
+  <div id="cart-container" class="cart-container"></div>
 
-<div id="cart-footer" class="cart-footer" style="display:none;">
-  <div class="cart-footer-left">
+  <div id="cart-footer" class="cart-footer" style="display:none;">
     <a href="/shop/" class="cart-back">← 繼續購物</a>
-  </div>
 
-  <div class="cart-footer-right">
-    <div class="cart-total">
-      總金額 <span id="cart-total-price">NT$ 0</span>
+    <div class="cart-summary">
+      <div class="row">
+        <span>商品小計</span><span id="cart-subtotal">NT$ 0</span>
+      </div>
+
+      <div id="coupon-row" class="coupon-row" style="display:none;">
+        <div id="coupon-text" class="coupon-text"></div>
+        <div class="row">
+          <span>優惠折扣</span>
+          <span>- <span id="cart-discount">NT$ 0</span></span>
+        </div>
+        <button id="coupon-cancel" class="coupon-cancel" type="button">取消</button>
+      </div>
+
+      <div class="row total">
+        <span>結帳金額</span><span id="cart-final-total">NT$ 0</span>
+      </div>
+
+      <div class="cart-hint">※ 實際結帳金額將於結帳頁再次確認</div>
+
+      <button id="checkoutBtn" class="btn-checkout" type="button">前往結帳</button>
     </div>
   </div>
-</div>
 
-<p id="cart-empty" class="cart-empty" style="display:none;">
-  購物車是空的
-</p>
+  <p id="cart-empty" class="cart-empty" style="display:none;">購物車是空的</p>
+</div>
 {% endblock content %}
 
 {% block extra_js %}
 <script>
+let cartSubtotal = 0;
+let selectedCoupon = null;
+let authToken = null;
+
 auth.onAuthStateChanged(async (user) => {
   if (!user) {
     window.location.href = "/login/";
     return;
   }
+  authToken = await user.getIdToken();
+  loadCart();
+});
 
-  const token = await user.getIdToken();
-
+async function loadCart() {
   const res = await fetch("/api/cart/", {
-    headers: {
-      Authorization: "Bearer " + token
-    }
+    headers: { Authorization: "Bearer " + authToken }
   });
-
   const cartItems = await res.json();
-  console.log("🛒 cartItems =", cartItems);
 
   if (!cartItems.length) {
     document.getElementById("cart-empty").style.display = "block";
+    document.getElementById("cart-footer").style.display = "none";
     return;
   }
 
   renderCart(cartItems);
-});
+  await loadBestCoupon();
+}
 
 function renderCart(items) {
   const container = document.getElementById("cart-container");
   const footer = document.getElementById("cart-footer");
-  const totalEl = document.getElementById("cart-total-price");
 
-  let total = 0;
+  cartSubtotal = 0;
   container.innerHTML = "";
 
   items.forEach(item => {
     const subtotal = item.price * item.quantity;
-    total += subtotal;
+    cartSubtotal += subtotal;
 
     container.innerHTML += `
       <div class="cart-item">
         <div class="cart-img">
-           <img src="/static/products/${item.imageKey}.png"
-               alt="${item.productName}">
+          <img src="/static/products/${item.imageKey}.png" alt="${item.productName}">
         </div>
 
-        <div class="cart-info">
-          <div class="cart-name">${item.productName}</div>
-          <div class="cart-size">尺寸：${item.size}</div>
-        </div>
+        <div class="cart-body">
+          <div class="cart-info">
+            <div class="cart-name">${item.productName}</div>
+            <div class="cart-size">尺寸：${item.size}</div>
+          </div>
 
-        <div class="cart-price">NT$ ${item.price}</div>
-        <div class="cart-qty">${item.quantity}</div>
-        <div class="cart-subtotal">NT$ ${subtotal}</div>
+          <div class="cart-meta">
+            <div class="meta-row"><span class="label">單價</span><span class="value">NT$ ${item.price}</span></div>
+            <div class="meta-row"><span class="label">數量</span><span class="value">${item.quantity}</span></div>
+            <div class="meta-row meta-strong"><span class="label">小計</span><span class="value">NT$ ${subtotal}</span></div>
+          </div>
+        </div>
       </div>
     `;
   });
 
-  totalEl.innerText = `NT$ ${total}`;
-  footer.style.display = "flex";
+  document.getElementById("cart-subtotal").innerText = `NT$ ${cartSubtotal}`;
+  footer.style.display = "block";
 }
+
+async function loadBestCoupon() {
+  const res = await fetch("/api/coupons/best", {
+    headers: { Authorization: "Bearer " + authToken }
+  });
+
+  if (!res.ok) {
+    updateFinalTotal(cartSubtotal);
+    return;
+  }
+
+  const data = await res.json();
+  if (data.bestCoupon) applyCoupon(data.bestCoupon);
+  else updateFinalTotal(cartSubtotal);
+}
+
+function applyCoupon(coupon) {
+  selectedCoupon = coupon;
+
+  document.getElementById("coupon-row").style.display = "block";
+  document.getElementById("coupon-text").innerText =
+    `系統已為你套用優惠券：${coupon.title}`;
+  document.getElementById("cart-discount").innerText = `NT$ ${coupon.value}`;
+
+  updateFinalTotal(cartSubtotal - coupon.value);
+}
+
+document.getElementById("coupon-cancel").addEventListener("click", () => {
+  selectedCoupon = null;
+  document.getElementById("coupon-row").style.display = "none";
+  updateFinalTotal(cartSubtotal);
+});
+
+function updateFinalTotal(amount) {
+  document.getElementById("cart-final-total").innerText = `NT$ ${amount}`;
+}
+
+document.getElementById("checkoutBtn").addEventListener("click", () => {
+  window.location.href = "/checkout/";
+});
 </script>
 {% endblock extra_js %}

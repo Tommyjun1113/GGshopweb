@@ -9,41 +9,243 @@
 
 <h1 class="checkout-title">結帳確認</h1>
 
-<div class="checkout-container">
+<!-- 商品清單 -->
+<div id="order-items" class="order-items"></div>
 
-    <table class="checkout-table">
-        <thead>
-            <tr>
-                <th>商品</th>
-                <th>尺寸</th>
-                <th>數量</th>
-                <th>小計</th>
-            </tr>
-        </thead>
-
-        <tbody>
-        {% for item in cart.values %}
-            <tr>
-                <td class="product-name">{{ item.title }}</td>
-                <td>{{ item.size }}</td>
-                <td>{{ item.qty }}</td>
-                <td class="price">NT$ {{ item.subtotal }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <div class="checkout-summary">
-        <div class="checkout-total">
-            總金額 <span>NT$ {{ total }}</span>
-        </div>
-
-        <form method="post" action="/order/submit/">
-            {% csrf_token %}
-            <button type="submit" class="btn-submit">確認下單</button>
-        </form>
-    </div>
-
+<!-- 金額區 -->
+<div class="checkout-summary">
+  <div>商品小計：<span id="subtotal">NT$ 0</span></div>
+  <div id="discount-row" style="display:none;">
+    優惠折扣：- <span id="discount">NT$ 0</span>
+  </div>
+  <div class="checkout-total">
+    結帳金額：<span id="total">NT$ 0</span>
+  </div>
 </div>
 
+<hr>
+
+<h2>付款方式</h2>
+
+<label>
+  <input type="radio" name="payment" value="COD" checked>
+  貨到付款
+</label>
+<br>
+
+<label>
+  <input type="radio" name="payment" value="CREDIT">
+  信用卡
+</label>
+<br>
+
+<label>
+  <input type="radio" name="payment" value="LINEPAY">
+  LINE Pay
+</label>
+
+<!-- 付款 / 收件資訊 -->
+<div id="payment-form" class="payment-form"></div>
+
+<button id="submitOrder" class="btn-submit">
+  確認下單
+</button>
+
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+let authToken = null;
+let cartItems = [];
+let subtotal = 0;
+let discount = 0;
+let total = 0;
+let selectedCoupon = null;
+
+// =============================
+// 驗證登入 + 載入資料
+// =============================
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    window.location.href = "/login/";
+    return;
+  }
+
+  authToken = await user.getIdToken();
+  await loadCart();
+  await loadBestCoupon();
+  renderPaymentForm();
+});
+
+// =============================
+// 讀取購物車
+// =============================
+async function loadCart() {
+  const res = await fetch("/api/cart/", {
+    headers: { Authorization: "Bearer " + authToken }
+  });
+
+  cartItems = await res.json();
+
+  if (!cartItems.length) {
+    alert("購物車是空的");
+    window.location.href = "/cart/";
+    return;
+  }
+
+  renderItems();
+}
+
+// =============================
+// 顯示商品
+// =============================
+function renderItems() {
+  const container = document.getElementById("order-items");
+  container.innerHTML = "";
+  subtotal = 0;
+
+  cartItems.forEach(item => {
+    const itemSubtotal = item.price * item.quantity;
+    subtotal += itemSubtotal;
+
+    container.innerHTML += `
+      <div class="order-item">
+        <div>${item.productName}</div>
+        <div>尺寸：${item.size}</div>
+        <div>數量：${item.quantity}</div>
+        <div>NT$ ${itemSubtotal}</div>
+      </div>
+    `;
+  });
+
+  document.getElementById("subtotal").innerText = `NT$ ${subtotal}`;
+  updateTotal();
+}
+
+// =============================
+// 試算最適合優惠券（不寫 DB）
+// =============================
+async function loadBestCoupon() {
+  const res = await fetch("/api/coupons/best", {
+    headers: { Authorization: "Bearer " + authToken }
+  });
+
+  if (!res.ok) return;
+
+  const data = await res.json();
+
+  if (data.bestCoupon) {
+    selectedCoupon = data.bestCoupon;
+    discount = selectedCoupon.value;
+
+    document.getElementById("discount-row").style.display = "block";
+    document.getElementById("discount").innerText = `NT$ ${discount}`;
+  }
+
+  updateTotal();
+}
+
+// =============================
+// 更新結帳金額
+// =============================
+function updateTotal() {
+  total = Math.max(subtotal - discount, 0);
+  document.getElementById("total").innerText = `NT$ ${total}`;
+}
+
+// =============================
+// 付款方式切換
+// =============================
+document.querySelectorAll("input[name='payment']").forEach(radio => {
+  radio.addEventListener("change", renderPaymentForm);
+});
+
+function renderPaymentForm() {
+  const method = document.querySelector("input[name='payment']:checked").value;
+  const container = document.getElementById("payment-form");
+
+  if (method === "COD") {
+    container.innerHTML = `
+      <h3>收件資訊</h3>
+      <input id="receiverName" placeholder="收件人姓名">
+      <input id="receiverPhone" placeholder="電話">
+      <input id="receiverAddress" placeholder="地址">
+    `;
+  }
+
+  if (method === "CREDIT") {
+    container.innerHTML = `
+      <h3>信用卡付款（模擬）</h3>
+      <input id="cardNumber" placeholder="卡號">
+      <input id="cardExpire" placeholder="有效期限 MM/YY">
+      <input id="cardCVC" placeholder="驗證碼">
+    `;
+  }
+
+  if (method === "LINEPAY") {
+    container.innerHTML = `
+      <h3>LINE Pay</h3>
+      <p>將導向 LINE Pay 付款（模擬）</p>
+    `;
+  }
+}
+
+// =============================
+// 送出訂單
+// =============================
+document.getElementById("submitOrder").addEventListener("click", async () => {
+  const paymentMethod = document.querySelector("input[name='payment']:checked").value;
+
+  let shippingInfo = null;
+  let paymentInfo = null;
+
+  if (paymentMethod === "COD") {
+    shippingInfo = {
+      name: document.getElementById("receiverName").value,
+      phone: document.getElementById("receiverPhone").value,
+      address: document.getElementById("receiverAddress").value
+    };
+
+    if (!shippingInfo.name || !shippingInfo.phone || !shippingInfo.address) {
+      alert("請填寫完整收件資訊");
+      return;
+    }
+  }
+
+  if (paymentMethod === "CREDIT") {
+    paymentInfo = {
+      cardNumber: document.getElementById("cardNumber").value,
+      expire: document.getElementById("cardExpire").value,
+      cvc: document.getElementById("cardCVC").value
+    };
+
+    if (!paymentInfo.cardNumber || !paymentInfo.expire || !paymentInfo.cvc) {
+      alert("請填寫完整信用卡資訊");
+      return;
+    }
+  }
+
+  const res = await fetch("/api/order/submit/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + authToken
+    },
+    body: JSON.stringify({
+      couponId: selectedCoupon ? selectedCoupon.id : null,
+      paymentMethod,
+      shippingInfo,
+      paymentInfo
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    window.location.href = "/order_success/";
+  } else {
+    alert("下單失敗，請稍後再試");
+  }
+});
+</script>
+{% endblock extra_js %}

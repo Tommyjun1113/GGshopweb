@@ -93,23 +93,44 @@ document.addEventListener("DOMContentLoaded", function () {
     qtyEl.innerText = qty < 1 ? 1 : qty;
   };
 
-  // =============================
-  // 購物車
-  // =============================
-  const form = document.querySelector("form[action='/cart/add/']");
-  if (!form) return;
+// =============================
+// 加入購物車（API 版本）
+// =============================
+const addToCartBtn = document.getElementById("addToCartBtn");
+const sizeSelect = document.getElementById("sizeSelect");
+const qtyEl = document.getElementById("qtyValue");
 
-  form.querySelector("input[name='sku']").value = product.sku;
-  form.querySelector("input[name='title']").value = product.title;
-  form.querySelector("input[name='price']").value = product.price;
-  form.querySelector("input[name='image']").value = product.images[0];
+addToCartBtn.addEventListener("click", async function () {
 
-  form.addEventListener("submit", function (e) {
-    const sizeSelect = document.getElementById("sizeSelect");
-    if (!sizeSelect.value || sizeSelect.value === "請選擇") {
-      e.preventDefault();
-      alert("請先選擇尺寸");
-    }
+  if (!sizeSelect.value || sizeSelect.value === "請選擇") {
+    alert("請先選擇尺寸");
+    return;
+  }
+
+  const payload = {
+    productId: product.sku,
+    productName: product.title,
+    price: product.price,
+    quantity: parseInt(qtyEl.innerText, 10),
+    size: sizeSelect.value,
+    imageKey: product.images[0],
+    createdAt: Date.now()
+  };
+
+  const res = await fetch("/api/cart/add/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
   });
 
+  const data = await res.json();
+
+  if (data.success) {
+    alert("已加入購物車");
+  } else {
+    alert("加入失敗，請先登入");
+  }
+});
 });

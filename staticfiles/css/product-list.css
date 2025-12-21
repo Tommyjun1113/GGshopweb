@@ -1,7 +1,7 @@
 /* 商品列表 Grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(3,1fr);
   gap: 32px;
   width: 100%;
 }
@@ -16,7 +16,6 @@
 }
 
 .product-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 12px 28px rgba(0,0,0,.12);
 }
 

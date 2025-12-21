@@ -74,20 +74,9 @@
     </div>
 
     <!-- 加入購物車 -->
-    <form method="post" action="/cart/add/">
-      {% csrf_token %}
-      <input type="hidden" name="sku">
-      <input type="hidden" name="title">
-      <input type="hidden" name="price">
-      <input type="hidden" name="image">
-      <input type="hidden" name="qty" id="cartQty" value="1">
-      <input type="hidden" name="size" id="cartSize">
-
-      <button type="submit" class="buy-btn">
+     <button type="button" class="buy-btn" id="addToCartBtn">
         加入購物車
-      </button>
-    </form>
-
+    </button>
     <!-- 商品描述 -->
     <div class="desc-wrapper">
 

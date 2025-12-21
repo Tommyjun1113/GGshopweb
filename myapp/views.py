@@ -1,16 +1,24 @@
 from django.shortcuts import render , redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 import json
 import random
 import requests
-from firebase_admin import firestore
+import firebase_admin
 from .firebase_init import db
 from .auth_utils import get_uid_from_request
 from django.views.decorators.csrf import csrf_exempt
-from firebase_admin import auth as firebase_auth
+from firebase_admin import credentials,auth as firebase_auth,firestore
 from django.contrib.auth import login
 from django.contrib.auth.models import User
+
+if not firebase_admin._apps:
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
 def GGshopping(request):
     return render(request, "GGshopping.html")
 
@@ -37,10 +45,45 @@ def product(request):
 
 def login_page(request):
     return render(request, "login.html")
+@csrf_exempt
+def firebase_login(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
+    try:
+        body = json.loads(request.body.decode("utf-8"))
+        token = body.get("token")
+        if not token:
+            return JsonResponse({"success": False, "message": "No token"}, status=400)
+
+        # 🔥 驗證 Firebase Token
+        decoded = firebase_auth.verify_id_token(token)
+
+        uid = decoded["uid"]
+        email = decoded.get("email", f"{uid}@firebase.local")
+
+        # 🔑 建立或取得 Django User
+        user, _ = User.objects.get_or_create(
+            username=uid,
+            defaults={"email": email}
+        )
+
+        # ✅ 建立 Django session
+        login(request, user)
+        print("✅ Django login success:", user.username)
+        return JsonResponse({"success": True})
+
+    except Exception as e:
+        print("🔥 firebase_login error:", e)
+        return JsonResponse(
+            {"success": False, "message": str(e)},
+            status=400
+        )
+# ================= LINE Login =================
 LINE_CHANNEL_ID = 2008634753
 LINE_CHANNEL_SECRET = "d417d86ac49cc7f482035a82ccc4a18d"
 LINE_REDIRECT_URI = "http://127.0.0.1:8000/api/auth/line/callback/"    # https://ggshopweb.onrender.com/api/auth/line/callback/
+
 def line_login(request):
     line_auth_url = (
         "https://access.line.me/oauth2/v2.1/authorize"
@@ -51,6 +94,7 @@ def line_login(request):
         f"&state=12345"
     )
     return redirect(line_auth_url)
+
 def line_callback(request):
     code = request.GET.get("code")
     if not code:
@@ -238,10 +282,41 @@ def api_cart_add(request):
         return JsonResponse({"error": "Unauthorized"}, status=401)
 
     item = json.loads(request.body)
-
-    db.collection("users").document(uid).collection("cart").add(item)
+    cart_ref = db.collection("users").document(uid).collection("cart")
+    exists = (
+        cart_ref
+        .where("productId", "==", item["productId"])
+        .where("size", "==", item["size"])
+        .stream()
+    )
+    exists = list(exists)
+    if exists:
+        doc = exists[0]
+        old_qty = doc.to_dict()["quantity"]
+        doc.reference.update({
+            "quantity": old_qty + item["quantity"]
+        })
+    else:
+        cart_ref.add(item)
     return JsonResponse({"success": True})
 
+@require_http_methods(["PATCH"])
+def api_cart_update(request, cart_id):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    body = json.loads(request.body)
+    quantity = int(body.get("quantity", 1))
+
+    ref = db.collection("users").document(uid).collection("cart").document(cart_id)
+
+    if quantity <= 0:
+        ref.delete()
+    else:
+        ref.update({"quantity": quantity})
+
+    return JsonResponse({"success": True})
 
 @require_POST
 def api_cart_delete(request, cart_id):
@@ -256,42 +331,107 @@ def api_cart_delete(request, cart_id):
         .delete()
 
     return JsonResponse({"success": True})
+def api_best_coupon(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
 
+   
+    cart_docs = db.collection("users").document(uid).collection("cart").stream()
+    total = sum(d.to_dict()["price"] * d.to_dict()["quantity"] for d in cart_docs)
 
+    coupons = db.collection("users").document(uid).collection("coupons") \
+        .where("used", "==", False) \
+        .stream()
 
+    best = None
+    for doc in coupons:
+        c = doc.to_dict()
+        if c["minSpend"] <= total:
+            if not best or c["value"] > best["value"]:
+                best = {**c, "id": doc.id}
 
+    return JsonResponse({
+        "cartTotal": total,
+        "bestCoupon": best
+    })
+def checkout(request):
+    return render("/checkout.html/")
 @require_POST
 def api_order_submit(request):
     uid = get_uid_from_request(request)
     if not uid:
         return JsonResponse({"error": "Unauthorized"}, status=401)
 
+    body = json.loads(request.body or "{}")
+    coupon_id = body.get("couponId")
+
     cart_ref = db.collection("users").document(uid).collection("cart")
-    cart_docs = cart_ref.stream()
+    cart_docs = list(cart_ref.stream())
+
+    if not cart_docs:
+        return JsonResponse({"error": "Cart empty"}, status=400)
 
     items = []
-    total = 0
+    subtotal = 0
 
     for doc in cart_docs:
         item = doc.to_dict()
         items.append(item)
-        total += item["price"] * item["quantity"]
+        subtotal += item["price"] * item["quantity"]
 
-    if not items:
-        return JsonResponse({"error": "Cart empty"}, status=400)
+   
+    discount = 0
+    coupon_data = None
 
+    if coupon_id:
+        coupon_ref = (
+            db.collection("users")
+            .document(uid)
+            .collection("coupons")
+            .document(coupon_id)
+        )
+        coupon_doc = coupon_ref.get()
+
+        if coupon_doc.exists:
+            coupon = coupon_doc.to_dict()
+
+            if (
+                not coupon.get("used", False)
+                and coupon["minSpend"] <= subtotal
+            ):
+                discount = coupon["value"]
+                coupon_data = {
+                    "couponId": coupon_id,
+                    "couponTitle": coupon["title"],
+                    "discount": discount
+                }
+
+                coupon_ref.update({
+                    "used": True,
+                    "usedAt": firestore.SERVER_TIMESTAMP
+                })
+
+    total = max(subtotal - discount, 0)
+
+  
     db.collection("orders").add({
         "uid": uid,
         "items": items,
+        "subtotal": subtotal,
+        "discount": discount,
         "total": total,
+        "coupon": coupon_data,
+        "paymentMethod": "WEB",
         "createdAt": firestore.SERVER_TIMESTAMP
     })
 
-   
-    for doc in cart_ref.stream():
+    
+    for doc in cart_docs:
         doc.reference.delete()
 
     return JsonResponse({"success": True})
+
 
 
 def api_orders(request):

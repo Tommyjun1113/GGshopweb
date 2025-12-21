@@ -31,6 +31,7 @@ urlpatterns = [
     path('product/', views.product),
     
     path("login/", views.login_page, name="login"),
+    path("api/firebase-login/",views.firebase_login),
     path("api/auth/line/login/", views.line_login),
     path("api/auth/line/callback/", views.line_callback),
 
@@ -44,8 +45,9 @@ urlpatterns = [
     path("cart/",views.cart_page, name="cart"),
     path("api/cart/", views.api_cart),
     path("api/cart/add/", views.api_cart_add),
+    path("api/cart/update/<str:cart_id>/",views.api_cart_update),
     path("api/cart/delete/<str:cart_id>/", views.api_cart_delete),
-
+    path("checkout/",views.checkout),
     path("api/order/submit/", views.api_order_submit),
     path("api/orders/", views.api_orders),
     

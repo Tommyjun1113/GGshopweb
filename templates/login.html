@@ -54,7 +54,7 @@
             <button class="social-btn line" type="button">
                 <img src="{% static 'icons/line.svg' %}">
             </button>
-            <button id="google-login-btn"class="social-btn" type="button">
+            <button id="google-login-btn" class="social-btn" type="button">
                 <img src="{% static 'icons/google.svg' %}">
             </button>
         </div>
@@ -174,6 +174,16 @@ function firebaseErrorToMessage(err) {
       return "密碼強度不足（至少 6 碼）";
     case "auth/invalid-credential":
       return "帳號或密碼錯誤";
+    case "auth/operation-not-allowed": 
+      return "Firebase 未啟用 Google 登入";
+    case "auth/unauthorized-domain": 
+      return "此網域未在 Firebase 授權清單中";
+    case "auth/popup-closed-by-user": 
+      return "登入視窗已被關閉";
+    case "auth/popup-closed-by-user":
+      return "登入視窗已被關閉，請重新點擊並完成登入。";
+    case "auth/popup-blocked":
+      return "請允許瀏覽器彈出視窗，以進行 Google 登入。";
     default:
       return "操作失敗，請稍後再試";
   }
@@ -220,16 +230,48 @@ function goForgotStep2() {
 <script>
   document.addEventListener("DOMContentLoaded", async () => {
     /* ================= Firebase 初始化 ================= */
-    if (!firebase.apps.length) {
-        firebase.initializeApp({
-        apiKey: "AIzaSyDQIC_jH4wQguSTnvmy2gdl3TyJcO-lXME",
-        authDomain: "shopping-54704.firebaseapp.com",
-        projectId: "shopping-54704",
-        });
+   if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: "AIzaSyDQIC_jH4wQguSTnvmy2gdl3TyJcO-lXME",
+      authDomain: "shopping-54704.firebaseapp.com",
+      projectId: "shopping-54704",
+    });
+  }
+
+  const auth = firebase.auth();
+
+  // 2️⃣ 🔔 唯一正確入口：等 Firebase 告訴你登入完成
+  try {
+    const result = await auth.getRedirectResult();
+
+    if (result.user) {
+      console.log("✅ Redirect Firebase 登入成功:", result.user.email);
+
+      const token = await result.user.getIdToken();
+
+      const res = await fetch("/api/firebase-login/", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": document.querySelector(
+            'meta[name="csrf-token"]'
+          ).content,
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      const data = await res.json();
+      console.log("🔥 Django response:", data);
+
+      if (data.success) {
+        window.location.replace("/GGshopping/");
+      }
     }
-
-    const auth = firebase.auth();
-
+  } catch (err) {
+    console.error("❌ getRedirectResult error:", err);
+  }
+    
     /* ================= Email / 密碼登入 ================= */
     document.getElementById("email-login-btn").onclick = async () => {
     hideError("login-error");
@@ -251,76 +293,33 @@ function goForgotStep2() {
     }
 
     try {
-        await firebase.auth().signInWithEmailAndPassword(email, password);
-        window.location.href = "/GGshopping/";
+        await auth.signInWithEmailAndPassword(email, password);
+        window.location.replace("/GGshopping/")
     } catch (err) {
         showError("login-error", firebaseErrorToMessage(err));
         emailInput.classList.add("input-error");
         passwordInput.classList.add("input-error");
     }
   };
-  
+
   /* ================= Google 登入 ================= */
-  const googleBtn = document.getElementById("google-login-btn");
-
-  googleBtn.addEventListener("click", async () => {
-    hideError("login-error");
-
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-
-    try {
-      // ✅ 直接 popup 登入
-      const result = await auth.signInWithRedict(provider);
-
-      // 登入成功
-      window.location.href = "/GGshopping/";
-    } catch (err) {
-      console.error("Google login error:", err);
-
-      // 🔥 Email 已存在 → 合併帳號
-      if (err.code === "auth/account-exists-with-different-credential") {
-        const pendingCred = err.credential;
-        const email = err.customData.email;
-
-        try {
-          const methods = await auth.fetchSignInMethodsForEmail(email);
-
-          if (methods.includes("password")) {
-            const password = prompt("此 Email 已存在，請輸入原本密碼以合併帳號");
-            if (!password) return;
-
-            const userCred =
-              await auth.signInWithEmailAndPassword(email, password);
-
-            await userCred.user.linkWithCredential(pendingCred);
-
-            alert("帳號合併成功！");
-            window.location.href = "/GGshopping/";
-            return;
-          }
-
-          alert("此帳號已用其他方式註冊，請使用原登入方式");
-
-        } catch (mergeErr) {
-          console.error("Merge error:", mergeErr);
-          showError("login-error", "帳號合併失敗，請確認密碼");
-        }
-      } else {
-        showError("login-error", firebaseErrorToMessage(err));
-      }
-    }
-  });
+  document
+    .getElementById("google-login-btn")
+    .addEventListener("click", function () {
+      console.log("🔥 Google 按鈕點擊");
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      auth.signInWithRedirect(provider);
+    });
   /* ================= LINE 登入 ================= */
   const lineBtn = document.querySelector(".social-btn img[src*='line']")?.parentElement;
-
-    if (lineBtn) {
+    if (lineBtn) { 
       lineBtn.addEventListener("click", () => {
-      
         window.location.href = "/api/auth/line/login/";
       });
     }
 });
+
 </script>
 
 <script>

@@ -1,0 +1,114 @@
+{% extends "GGshopping.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-layout">
+
+  
+  <aside class="sidebar-profile-menu">
+    <div class="menu-title">我的帳戶</div>
+    <ul class="submenu">
+      <li><a href="/profile/">我的帳戶</a></li>
+      <li><a href="/orders/" class="active">購買紀錄</a></li>
+      <li><a href="/favorites/">我的最愛</a></li>
+    </ul>
+  </aside>
+
+ 
+  <section class="profile-card">
+    <h2>購買紀錄</h2>
+    <div id="orders-container"></div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/orders.js' %}"></script>
+<script>
+let token = null;
+function waitForAuth() {
+  return new Promise(resolve => {
+    const unsub = auth.onAuthStateChanged(user => {
+      if (user) {
+        unsub();
+        resolve(user);
+      }
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const user = await waitForAuth();
+  const token = await user.getIdToken();
+
+  const res = await fetch("/api/orders/", {
+    headers: {
+      Authorization: "Bearer " + token
+    }
+  });
+  if (res.status === 401) {
+    document.getElementById("orders-container").innerHTML =
+      `<p style="color:#c00;">登入狀態已失效，請重新登入</p>`;
+    return;
+  }
+
+  // ❌ 其他錯誤
+  if (!res.ok) {
+    document.getElementById("orders-container").innerHTML =
+      `<p style="color:#c00;">訂單載入失敗，請稍後再試</p>`;
+    return;
+  }
+
+  const orders = await res.json();
+
+  console.log("orders =",orders);
+  renderOrders(orders);
+});
+
+function renderOrders(orders) {
+  const container = document.getElementById("orders-container");
+  container.innerHTML = "";
+
+  if (!Array.isArray(orders) || orders.length === 0) {
+    document.getElementById("orders-container").innerHTML =
+      `<p style="color:#666;">尚無購買紀錄</p>`;
+    return;
+  }
+
+  orders.forEach(order => {
+    const date = order.createdAt?.seconds
+      ? new Date(order.createdAt.seconds * 1000).toLocaleDateString()
+      : "";
+
+    let itemsHtml = "";
+    order.items.forEach(item => {
+      itemsHtml += `
+        <div class="order-item">
+          <span>${item.productName}</span>
+          <span>x ${item.quantity}</span>
+          <span>NT$ ${item.price}</span>
+        </div>
+      `;
+    });
+
+    container.innerHTML += `
+      <div class="order-card">
+        <div class="order-header">
+          <span>訂單日期：${date}</span>
+          <span>總金額：NT$ ${order.total}</span>
+        </div>
+        <div class="order-items">
+          ${itemsHtml}
+        </div>
+      </div>
+    `;
+  });
+}
+
+</script>
+{% endblock %}

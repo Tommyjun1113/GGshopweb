@@ -1,0 +1,70 @@
+{% extends "GGshopping.html" %}
+{% load static %}
+
+{% block content %}
+<div class="login-container">
+  <h2>LINE 登入中，請稍候...</h2>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: "AIzaSyDQIC_jH4wQguSTnvmy2gdl3TyJcO-lXME",
+      authDomain: "shopping-54704.firebaseapp.com",
+      projectId: "shopping-54704",
+    });
+  }
+
+  
+  const token = "{{ firebase_token|escapejs }}";
+
+  if (!token) {
+    alert("LINE 登入失敗，缺少 Firebase token");
+    window.location.href = "https://192.168.59.19:8080/login/"; /*"https://ggshopweb.onrender.com/login/"*/
+    return;
+  }
+
+  
+  firebase.auth().signInWithCustomToken(token)
+    .then(() => {
+      const user = firebase.auth().currentUser;
+    const idToken = await user.getIdToken();
+
+    const res = await fetch("/api/firebase-login/", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector(
+          'meta[name="csrf-token"]'
+        ).content,
+      },
+      body: JSON.stringify({ token: idToken }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      window.location.href = "/GGshopping/";
+    } else {
+      alert("LINE 登入失敗（後端）");
+      window.location.href = "/login/";
+    }
+  })
+    })
+    .catch(err => {
+      console.error(err);
+      alert("LINE 登入失敗：" + err.message);
+      window.location.href = "https://192.168.59.19:8080/login/";
+    });
+});
+</script>
+{% endblock %}

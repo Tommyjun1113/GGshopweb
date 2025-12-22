@@ -1,0 +1,93 @@
+{% extends 'GGshopping.html' %}
+{% load static %}
+
+{% block title %}
+<title>聯絡我們｜GG SHOP</title>
+{% endblock title %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock head %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+  <!-- 聯絡資訊 -->
+  <section class="contact-info">
+    <div class="card">
+      <div class="icon">📞</div>
+      <h3>PHONE NUMBER</h3>
+      <p>034855368</p>
+    </div>
+
+    <div class="card">
+      <div class="icon">✉️</div>
+      <h3>EMAIL ADDRESS</h3>
+      <p>service@gmail.com</p>
+    </div>
+
+    <div class="card">
+      <div class="icon">📍</div>
+      <h3>HEAD OFFICE</h3>
+      <p>326 桃園市楊梅區秀才路 851 號</p>
+    </div>
+  </section>
+
+  <!-- 聯絡表單 -->
+  <section class="contact-form mt-5">
+    <h2>聯絡我們</h2>
+
+    <form id="contactForm">
+      <label>請問怎麼稱呼您？</label>
+      <input type="text" name="name" required>
+
+      <div class="row">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="phone" placeholder="電話">
+      </div>
+
+      <input type="text" name="company" placeholder="公司單位名稱">
+
+      <textarea name="message" placeholder="留言內容" required></textarea>
+
+      <button type="submit">送出訊息</button>
+    </form>
+
+    <p id="result" class="mt-3"></p>
+  </section>
+
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.getElementById("contactForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const url = "https://script.google.com/macros/s/AKfycbz_3IAKK_qu62IrjNwJgQjCq1p-baaYJCRsCNF-xu_01CZTfcF4SESbUOff6zbjoV2E/exec";
+  const formData = new FormData(this);
+
+  fetch(url, {
+    method: "POST",
+    body: formData
+  })
+    .then(res => res.text())
+    .then(text => {
+      if (text === "SUCCESS") {
+        document.getElementById("result").innerHTML =
+          "✅ 已成功寄出，我們將盡快與您聯繫！";
+        document.getElementById("contactForm").reset();
+      } else {
+        document.getElementById("result").innerHTML =
+          "❌ 寄信失敗：後端未回傳 SUCCESS";
+      }
+    })
+    .catch(() => {
+      document.getElementById("result").innerHTML =
+        "❌ 寄信失敗：請稍後再試~";
+    });
+});
+</script>
+{% endblock extra_js %}

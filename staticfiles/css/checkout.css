@@ -1,0 +1,72 @@
+/* 標題 */
+.checkout-title {
+    font-size: 26px;
+    margin: 40px 0 30px;
+    text-align: center;
+}
+
+/* 外框 */
+.checkout-container {
+    max-width: 900px;
+    margin: 0 auto 80px;
+    padding: 0 20px;
+}
+
+/* 表格 */
+.checkout-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.checkout-table th {
+    background: #f5f5f5;
+    padding: 14px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.checkout-table td {
+    padding: 14px;
+    border-bottom: 1px solid #eee;
+}
+
+.product-name {
+    font-weight: 500;
+}
+
+.price {
+    font-weight: bold;
+}
+
+/* 右側總結 */
+.checkout-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 總金額 */
+.checkout-total {
+    font-size: 18px;
+}
+
+.checkout-total span {
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+/* 下單按鈕 */
+.btn-submit {
+    padding: 14px 36px;
+    background: black;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-submit:hover {
+    opacity: 0.85;
+}

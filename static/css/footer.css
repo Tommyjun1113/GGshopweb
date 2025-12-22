@@ -1,0 +1,30 @@
+.footer-copyright {
+    text-align: center;
+    color: var(--copyright-text,#fff);
+    background-color: var(--copyright-background,#000000);
+    padding: 20px 0;
+    font-size: clamp(12px, 2.8vw, 14px);
+    position: static;    /* ❗移除 fixed */
+    height: auto;        /* 自動高度 */
+    bottom: 0;
+}
+
+.footer-copyright.--text_align_left {
+    text-align: left;
+}
+
+.footer-copyright.--text_align_right {
+    text-align: right;
+}
+
+.footer-copyright.section-width {
+    padding: 0 30px;
+}
+
+.section-width {
+    padding: 0 30px;
+}
+
+.social-content {
+    margin-bottom: 20px;
+}

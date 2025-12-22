@@ -1,0 +1,193 @@
+{% extends "GGshopping.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock head %}
+
+{% block content %}
+<h1 class="cart-title">購物車</h1>
+
+<div class="cart-page">
+  <div id="cart-container" class="cart-container"></div>
+
+  <div id="cart-footer" class="cart-footer" style="display:none;">
+    <a href="/shop/" class="cart-back">← 繼續購物</a>
+
+    <div class="cart-summary">
+      <div class="row">
+        <span>商品小計</span><span id="cart-subtotal">NT$ 0</span>
+      </div>
+
+      <div id="coupon-row" class="coupon-row" style="display:none;">
+        <div id="coupon-text" class="coupon-text"></div>
+        <div class="row">
+          <span>優惠折扣</span>
+          <span>- <span id="cart-discount">NT$ 0</span></span>
+        </div>
+        <button id="coupon-cancel" class="coupon-cancel" type="button">取消</button>
+      </div>
+
+      <div class="row total">
+        <span>結帳金額</span><span id="cart-final-total">NT$ 0</span>
+      </div>
+
+      <div class="cart-hint">※ 實際結帳金額將於結帳頁再次確認</div>
+
+      <button id="checkoutBtn" class="btn-checkout" type="button">前往結帳</button>
+    </div>
+  </div>
+
+  <p id="cart-empty" class="cart-empty" style="display:none;">購物車是空的</p>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+let cartSubtotal = 0;
+let selectedCoupon = null;
+let authToken = null;
+
+/* =============================
+   ✅ 正確等待 Firebase 登入完成
+============================= */
+function waitForAuth() {
+  return new Promise(resolve => {
+    const unsub = auth.onAuthStateChanged(user => {
+      if (user) {
+        unsub();
+        resolve(user);
+      }
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const user = await waitForAuth();   
+    authToken = await user.getIdToken();
+    await loadCart();
+  } catch (err) {
+    console.error("Auth error:", err);
+    window.location.href = "/login/";
+  }
+});
+
+/* =============================
+   讀取購物車
+============================= */
+async function loadCart() {
+  const res = await fetch("/api/cart/", {
+    headers: {
+      Authorization: "Bearer " + authToken
+    }
+  });
+
+  if (!res.ok) {
+    console.error("❌ 讀取購物車失敗");
+    return;
+  }
+
+  const cartItems = await res.json();
+
+  if (!cartItems.length) {
+    document.getElementById("cart-empty").style.display = "block";
+    document.getElementById("cart-footer").style.display = "none";
+    return;
+  }
+
+  renderCart(cartItems);
+  await loadBestCoupon();
+}
+
+/* =============================
+   顯示購物車商品
+============================= */
+function renderCart(items) {
+  const container = document.getElementById("cart-container");
+  const footer = document.getElementById("cart-footer");
+
+  cartSubtotal = 0;
+  container.innerHTML = "";
+
+  items.forEach(item => {
+    const subtotal = item.price * item.quantity;
+    cartSubtotal += subtotal;
+
+    container.innerHTML += `
+      <div class="cart-item">
+        <div class="cart-img">
+          <img src="/static/products/${item.imageKey}.png" alt="${item.productName}">
+        </div>
+
+        <div class="cart-body">
+          <div class="cart-info">
+            <div class="cart-name">${item.productName}</div>
+            <div class="cart-size">尺寸：${item.size}</div>
+          </div>
+
+          <div class="cart-meta">
+            <div class="meta-row"><span>單價</span><span>NT$ ${item.price}</span></div>
+            <div class="meta-row"><span>數量</span><span>${item.quantity}</span></div>
+            <div class="meta-row meta-strong"><span>小計</span><span>NT$ ${subtotal}</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("cart-subtotal").innerText = `NT$ ${cartSubtotal}`;
+  footer.style.display = "block";
+}
+
+/* =============================
+   最佳優惠券
+============================= */
+async function loadBestCoupon() {
+  const res = await fetch("/api/coupons/best", {
+    headers: {
+      Authorization: "Bearer " + authToken
+    }
+  });
+
+  if (!res.ok) {
+    updateFinalTotal(cartSubtotal);
+    return;
+  }
+
+  const data = await res.json();
+  if (data.bestCoupon) {
+    applyCoupon(data.bestCoupon);
+  } else {
+    updateFinalTotal(cartSubtotal);
+  }
+}
+
+function applyCoupon(coupon) {
+  selectedCoupon = coupon;
+  document.getElementById("coupon-row").style.display = "block";
+  document.getElementById("coupon-text").innerText =
+    `系統已為你套用優惠券：${coupon.title}`;
+  document.getElementById("cart-discount").innerText = `NT$ ${coupon.value}`;
+  updateFinalTotal(cartSubtotal - coupon.value);
+}
+
+document.getElementById("coupon-cancel").onclick = () => {
+  selectedCoupon = null;
+  document.getElementById("coupon-row").style.display = "none";
+  updateFinalTotal(cartSubtotal);
+};
+
+function updateFinalTotal(amount) {
+  document.getElementById("cart-final-total").innerText = `NT$ ${amount}`;
+}
+
+/* =============================
+   前往結帳
+============================= */
+document.getElementById("checkoutBtn").onclick = () => {
+  window.location.href = "/checkout/";
+};
+</script>
+{% endblock extra_js %}
+

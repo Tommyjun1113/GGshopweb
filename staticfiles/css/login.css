@@ -1,0 +1,197 @@
+/* ===== 登入頁整體 ===== */
+
+.content {
+  min-height: calc(100vh - 220px); 
+  display: flex;
+  justify-content: center; 
+  align-items: center;     
+}
+
+.msg {
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.msg.error {
+  background: #fdecea;
+  color: #c62828;
+}
+
+.msg.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.login-container {
+    max-width: 420px;
+    margin: 80px auto;
+    padding: 40px 32px;
+    background: #fff;
+}
+
+/* 標題 */
+.login-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 32px;
+}
+
+/* 輸入框 */
+.login-input {
+    width: 100%;
+    padding: 14px 12px;
+    margin-bottom: 16px;
+    font-size: 16px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    outline: none;
+}
+
+.login-input:focus {
+    border-bottom: 1px solid #1f4f7c;
+}
+
+.login-error {
+  display: none;
+  margin: 12px 0 18px;
+  padding: 10px 14px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  line-height: 1.4;
+  color: #b42318;
+
+  background-color: #fdecea;
+  border: 1px solid #f5c2c7;
+
+  align-items: center;
+  gap: 8px;
+}
+.login-error::before {
+  content: "⚠️";
+  font-size: 16px;
+}
+.input-error {
+  border-bottom: 2px solid #e53935 !important;
+}
+
+/* 幫助提示 */
+.helper-text {
+    font-size: 14px;
+    color: #666;
+    margin-top: 16px;
+}
+
+.helper-text span:last-child {
+    color: #1f4f7c;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+/* 登入按鈕 */
+.login-btn {
+    width: 100%;
+    padding: 14px 0;
+    background: #000000;
+    color: #fff;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-btn:hover {
+    background: #173c60;
+}
+
+/* 分隔文字 */
+.divider {
+    text-align: center;
+    margin: 24px 0 16px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 社群登入 */
+.social-login {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.social-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.social-btn img {
+    width: 22px;
+    height: 22px;
+}
+
+/* LINE */
+.social-btn.line {
+    background: #06c755;
+    border: none;
+}
+
+.social-btn.line img {
+    filter: brightness(0) invert(1);
+}
+
+/* 註冊 */
+.register-section {
+    text-align: center;
+    margin-top: 32px;
+}
+
+.register-section h3 {
+    margin-bottom: 12px;
+}
+
+.register-btn {
+    width: 100%;
+    padding: 12px 0;
+    background: #fff;
+    border: 1px solid #1f4f7c;
+    color: #1f4f7c;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.register-btn:hover {
+    background: #f2f6fb;
+}
+
+
+/* ===== 表單切換 ===== */
+.form-box {
+    display: none;
+}
+
+.form-box.active {
+    display: block;
+}
+
+/* ===== 註冊步驟 ===== */
+.form-step {
+    display: none;
+}
+
+.form-step.active {
+    display: block;
+}
+
+
+

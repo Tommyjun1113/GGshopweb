@@ -1,0 +1,59 @@
+
+.welcome-text {
+  margin-right: 0.8em;
+  font-size: 1em;
+  font-weight: 600;
+}
+.newmember img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.member-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.welcome-text {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: #111;
+}
+
+.member-dropdown {
+  position: absolute;
+  right: 0;
+  top: 140%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  min-width: 160px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.member-dropdown a {
+  display: block;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #333;
+  text-decoration: none;
+}
+
+.member-dropdown a:hover {
+  background: #f5f5f5;
+}
+
+
+.logout-link {
+  margin-right: 1em;
+  font-size: 1em;
+  color: #333;
+  text-decoration: none;
+}
+
+.logout-link:hover {
+    text-decoration: underline;
+}

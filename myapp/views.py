@@ -1,23 +1,20 @@
-from django.shortcuts import render , redirect
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.views.decorators.http import require_http_methods
-import json
-import random
-import requests
-import firebase_admin
-from .firebase_init import db
-from .auth_utils import get_uid_from_request
+from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from firebase_admin import credentials,auth as firebase_auth,firestore
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 
-if not firebase_admin._apps:
-    cred = credentials.Certificate("serviceAccountKey.json")
-    firebase_admin.initialize_app(cred)
+import json
+import random
+import requests
 
-db = firestore.client()
+from firebase_admin import auth as firebase_auth, firestore
+
+from .auth_utils import get_uid_from_request
+from .firebase_init import init_firebase
+from .firebase_init import get_db
+
 
 def GGshopping(request):
     return render(request, "GGshopping.html")
@@ -45,47 +42,59 @@ def product(request):
 
 def login_page(request):
     return render(request, "login.html")
+
+def profile_page(request):
+    return render(request, "profile.html")
+
+def cart_page(request):
+    return render(request,"cart.html")
+
+def checkout(request):
+    return render(request,"checkout.html")
+
+def orders_page(request):
+    return render(request,"orders.html")
+
+def favorites_page(request):
+    return render(request,"favorites.html")
+
 @csrf_exempt
 def firebase_login(request):
+    init_firebase()
     if request.method != "POST":
-        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+        return JsonResponse({"success": False}, status=405)
 
     try:
-        body = json.loads(request.body.decode("utf-8"))
+        body = json.loads(request.body)
         token = body.get("token")
-        if not token:
-            return JsonResponse({"success": False, "message": "No token"}, status=400)
 
-        # 🔥 驗證 Firebase Token
         decoded = firebase_auth.verify_id_token(token)
-
         uid = decoded["uid"]
         email = decoded.get("email", f"{uid}@firebase.local")
 
-        # 🔑 建立或取得 Django User
-        user, _ = User.objects.get_or_create(
-            username=uid,
-            defaults={"email": email}
-        )
+        db = get_db()
+        db.collection("users").document(uid).set({
+            "uid": uid,
+            "email": email,
+            "provider": decoded.get("firebase", {}).get("sign_in_provider"),
+            "lastLoginAt": firestore.SERVER_TIMESTAMP
+        }, merge=True)
 
-        # ✅ 建立 Django session
-        login(request, user)
-        print("✅ Django login success:", user.username)
+        # ❌ 不要 login(request, user)
         return JsonResponse({"success": True})
 
     except Exception as e:
-        print("🔥 firebase_login error:", e)
-        return JsonResponse(
-            {"success": False, "message": str(e)},
-            status=400
-        )
-# ================= LINE Login =================
+        print("❌ firebase_login error:", e)
+        return JsonResponse({"success": False}, status=400)
+
+
+
 LINE_CHANNEL_ID = 2008634753
 LINE_CHANNEL_SECRET = "d417d86ac49cc7f482035a82ccc4a18d"
-LINE_REDIRECT_URI = "http://127.0.0.1:8000/api/auth/line/callback/"    # https://ggshopweb.onrender.com/api/auth/line/callback/
+LINE_REDIRECT_URI = "http://192.168.59.19:8080/api/auth/line/callback/" # https://ggshopweb.onrender.com/api/auth/line/callback/
 
 def line_login(request):
-    line_auth_url = (
+    url = (
         "https://access.line.me/oauth2/v2.1/authorize"
         f"?response_type=code"
         f"&client_id={LINE_CHANNEL_ID}"
@@ -93,14 +102,13 @@ def line_login(request):
         f"&scope=profile%20openid%20email"
         f"&state=12345"
     )
-    return redirect(line_auth_url)
+    return redirect(url)
 
 def line_callback(request):
     code = request.GET.get("code")
     if not code:
-        return JsonResponse({"success": False, "error": "no code"})
+        return JsonResponse({"error": "no code"}, status=400)
 
-    # 1️⃣ 換 access token
     token_res = requests.post(
         "https://api.line.me/oauth2/v2.1/token",
         data={
@@ -113,59 +121,45 @@ def line_callback(request):
     ).json()
 
     access_token = token_res.get("access_token")
-    if not access_token:
-        return JsonResponse({"success": False, "error": "token failed"})
-
-    # 2️⃣ 取得使用者資料
     profile = requests.get(
         "https://api.line.me/v2/profile",
         headers={"Authorization": f"Bearer {access_token}"}
     ).json()
 
-    line_user_id = profile.get("userId")
-    display_name = profile.get("displayName")
-    picture_url = profile.get("pictureUrl")
+    uid = f"line:{profile.get('userId')}"
+    db = get_db()
 
-    if not line_user_id:
-        return JsonResponse({"success": False})
-
-    uid = f"line:{line_user_id}"
-
-    # 3️⃣ 建立 Firebase 使用者（如果不存在）
     try:
         firebase_auth.get_user(uid)
     except:
         firebase_auth.create_user(
             uid=uid,
-            display_name=display_name,
-            photo_url = picture_url
-        ),
-    db.collection("users").document(uid).set({
-        "uid" : uid,
-        "name" : display_name,
-        "provider" : "line",
-        "photo" : picture_url,
-        "createdAt" : firestore.SERVER_TIMESTAMP,
-    }, merge=True)
-    # 4️⃣ 建立 Firebase Custom Token
-    custom_token = firebase_auth.create_custom_token(uid)
+            display_name=profile.get("displayName"),
+            photo_url=profile.get("pictureUrl"),
+        )
 
-    # 5️⃣ 回傳 token 給前端
+    db.collection("users").document(uid).set({
+        "uid": uid,
+        "name": profile.get("displayName"),
+        "provider": "line",
+        "photo": profile.get("pictureUrl"),
+        "createdAt": firestore.SERVER_TIMESTAMP,
+    }, merge=True)
+
+    token = firebase_auth.create_custom_token(uid)
     return render(request, "line_callback.html", {
-        "firebase_token": custom_token.decode()
+        "firebase_token": token.decode()
     })
+
+@csrf_exempt
 def api_profile(request):
     uid = get_uid_from_request(request)
-    if not uid:
-        return JsonResponse({"error": "Unauthorized"}, status=401)
-
+    db = get_db()
     doc = db.collection("users").document(uid).get()
-    if not doc.exists:
-        return JsonResponse({"error": "User not found"}, status=404)
-
-    return JsonResponse(doc.to_dict())
+    return JsonResponse(doc.to_dict() if doc.exists else {}, safe=False)
 
 
+@csrf_exempt
 @require_POST
 def api_profile_update(request):
     uid = get_uid_from_request(request)
@@ -173,9 +167,10 @@ def api_profile_update(request):
         return JsonResponse({"error": "Unauthorized"}, status=401)
 
     body = json.loads(request.body)
-
+    db = get_db()
     db.collection("users").document(uid).set(body, merge=True)
     return JsonResponse({"success": True})
+
 @csrf_exempt
 def api_forgot_send_code(request):
     if request.method != "POST":
@@ -186,8 +181,10 @@ def api_forgot_send_code(request):
 
     if not email:
         return JsonResponse({"success": False, "message": "缺少 Email"})
-
+    
+    db = get_db()
     users = list(db.collection("users").where("email", "==", email).stream())
+
     if not users:
         return JsonResponse({"success": False, "message": "Email 不存在"})
 
@@ -207,6 +204,7 @@ def api_forgot_send_code(request):
     )
 
     return JsonResponse({"success": True})
+
 @csrf_exempt
 def api_forgot_verify_code(request):
     if request.method != "POST":
@@ -215,7 +213,7 @@ def api_forgot_verify_code(request):
     body = json.loads(request.body)
     email = body.get("email")
     code = body.get("code")
-
+    db = get_db()
     users = db.collection("users").where("email", "==", email).stream()
     users = list(users)
 
@@ -226,6 +224,7 @@ def api_forgot_verify_code(request):
         return JsonResponse({"success": True})
     else:
         return JsonResponse({"success": False})
+    
 @csrf_exempt
 def api_forgot_reset_password(request):
     if request.method != "POST":
@@ -247,21 +246,23 @@ def api_forgot_reset_password(request):
         user.uid,
         password=new_password
     )
-
+    db = get_db()
     users = list(db.collection("users").where("email", "==", email).stream())
     if users:
         users[0].reference.update({"resetCode": ""})
 
     return JsonResponse({"success": True})
-# 購物車頁面
-def cart_page(request):
-    return render(request,"cart.html")
+
+
+
 
 def api_cart(request):
     uid = get_uid_from_request(request)
+    print("📦 api_cart UID =", uid)
     if not uid:
         return JsonResponse({"error": "Unauthorized"}, status=401)
 
+    db = get_db()
     docs = (
         db.collection("users")
         .document(uid)
@@ -269,18 +270,31 @@ def api_cart(request):
         .stream()
     )
 
-    return JsonResponse(
-        [{**doc.to_dict(), "id": doc.id} for doc in docs],
-        safe=False
-    )
+    result = []
+
+    for doc in docs:
+        item = doc.to_dict()
+        
+        result.append({
+            "id": doc.id,
+            "productId": item.get("productId"),
+            "productName": item.get("productName"),  
+            "price": item.get("price", 0),
+            "quantity": item.get("quantity", 1),
+            "size": item.get("size", ""),
+            "imageKey": item.get("imageKey"), 
+        })
+
+    return JsonResponse(result, safe=False)
 
 
+@csrf_exempt
 @require_POST
 def api_cart_add(request):
     uid = get_uid_from_request(request)
     if not uid:
         return JsonResponse({"error": "Unauthorized"}, status=401)
-
+    db = get_db()
     item = json.loads(request.body)
     cart_ref = db.collection("users").document(uid).collection("cart")
     exists = (
@@ -308,7 +322,7 @@ def api_cart_update(request, cart_id):
 
     body = json.loads(request.body)
     quantity = int(body.get("quantity", 1))
-
+    db = get_db()
     ref = db.collection("users").document(uid).collection("cart").document(cart_id)
 
     if quantity <= 0:
@@ -323,7 +337,7 @@ def api_cart_delete(request, cart_id):
     uid = get_uid_from_request(request)
     if not uid:
         return JsonResponse({"error": "Unauthorized"}, status=401)
-
+    db = get_db()
     db.collection("users") \
         .document(uid) \
         .collection("cart") \
@@ -331,12 +345,30 @@ def api_cart_delete(request, cart_id):
         .delete()
 
     return JsonResponse({"success": True})
+
+@csrf_exempt
+@require_POST
+def api_cart_delete_batch(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    body = json.loads(request.body or "{}")
+    ids = body.get("ids", [])
+
+    db = get_db()
+    cart_ref = db.collection("users").document(uid).collection("cart")
+
+    for cart_id in ids:
+        cart_ref.document(cart_id).delete()
+
+    return JsonResponse({"success": True})
 def api_best_coupon(request):
     uid = get_uid_from_request(request)
     if not uid:
         return JsonResponse({"error": "Unauthorized"}, status=401)
 
-   
+    db = get_db()
     cart_docs = db.collection("users").document(uid).collection("cart").stream()
     total = sum(d.to_dict()["price"] * d.to_dict()["quantity"] for d in cart_docs)
 
@@ -355,8 +387,53 @@ def api_best_coupon(request):
         "cartTotal": total,
         "bestCoupon": best
     })
-def checkout(request):
-    return render("/checkout.html/")
+
+@csrf_exempt
+@require_POST
+def api_checkout_prepare(request):
+    uid = get_uid_from_request(request)
+    body = json.loads(request.body)
+    cart_ids = body.get("cartIds", [])
+
+    db = get_db()
+    docs = db.collection("users").document(uid).collection("cart") \
+        .where(firestore.FieldPath.document_id(), "in", cart_ids) \
+        .stream()
+
+    items = []
+    subtotal = 0
+    for d in docs:
+        item = d.to_dict()
+        items.append(item)
+        subtotal += item["price"] * item["quantity"]
+
+    request.session["checkout_items"] = items
+    request.session["checkout_subtotal"] = subtotal
+
+    return JsonResponse({"success": True})
+
+
+
+def api_orders(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+    db = get_db()
+    docs = (
+        db.collection("users")
+        .document(uid)
+        .collection("orders")
+        .order_by("createdAt", direction=firestore.Query.DESCENDING)
+        .stream()
+    )
+
+    result = []
+    for doc in docs:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        result.append(data)
+    return JsonResponse(result, safe=False)
+
 @require_POST
 def api_order_submit(request):
     uid = get_uid_from_request(request)
@@ -365,7 +442,7 @@ def api_order_submit(request):
 
     body = json.loads(request.body or "{}")
     coupon_id = body.get("couponId")
-
+    db = get_db()
     cart_ref = db.collection("users").document(uid).collection("cart")
     cart_docs = list(cart_ref.stream())
 
@@ -432,12 +509,5 @@ def api_order_submit(request):
 
     return JsonResponse({"success": True})
 
-
-
-def api_orders(request):
-    uid = get_uid_from_request(request)
-    if not uid:
-        return JsonResponse({"error": "Unauthorized"}, status=401)
-
-    docs = db.collection("orders").where("uid", "==", uid).stream()
-    return JsonResponse([doc.to_dict() for doc in docs], safe=False)
+def api_favorites(request):
+    return JsonResponse({"success": True})

@@ -35,8 +35,9 @@ urlpatterns = [
     path("api/auth/line/login/", views.line_login),
     path("api/auth/line/callback/", views.line_callback),
 
+    path("profile/", views.profile_page, name="profile"),
     path("api/profile/", views.api_profile),
-    path("api/profile/update/", views.api_profile_update),
+    path("api/profile_update/", views.api_profile_update),
 
     path("api/forgot/send-code/",views.api_forgot_send_code),
     path("api/forgot/verify-code/",views.api_forgot_verify_code),
@@ -47,9 +48,16 @@ urlpatterns = [
     path("api/cart/add/", views.api_cart_add),
     path("api/cart/update/<str:cart_id>/",views.api_cart_update),
     path("api/cart/delete/<str:cart_id>/", views.api_cart_delete),
+    path("api/cart/delete-batch/", views.api_cart_delete_batch),
+    path("api/coupons/best", views.api_best_coupon),
+    path("api/checkout/prepare/", views.api_checkout_prepare),
     path("checkout/",views.checkout),
-    path("api/order/submit/", views.api_order_submit),
+
+    path("orders/",views.orders_page, name="orders"),
     path("api/orders/", views.api_orders),
+    path("api/order/submit/", views.api_order_submit),
     
+    path("favorites/", views.favorites_page, name="favorites"),
+    path("api/favorites/", views.api_favorites),
 
 ]

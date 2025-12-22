@@ -294,8 +294,29 @@ function goForgotStep2() {
 
     try {
         await auth.signInWithEmailAndPassword(email, password);
-        window.location.replace("/GGshopping/")
-    } catch (err) {
+          const user = firebase.auth().currentUser;
+          const token = await user.getIdToken();
+
+          const res = await fetch("/api/firebase-login/", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": document.querySelector(
+                'meta[name="csrf-token"]'
+              ).content,
+            },
+            body: JSON.stringify({ token }),
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            window.location.replace("/GGshopping/");
+          } else {
+            alert("登入失敗（後端）");
+          }
+      } catch (err) {
         showError("login-error", firebaseErrorToMessage(err));
         emailInput.classList.add("input-error");
         passwordInput.classList.add("input-error");
@@ -453,4 +474,3 @@ document.getElementById("reset-password-btn").onclick = async () => {
 </script>
 
 {% endblock %}
-

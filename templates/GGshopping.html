@@ -141,9 +141,11 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
   </script>
+
   <script>
     auth.onAuthStateChanged(async (user) => {
       const memberArea = document.getElementById("member-area");
+      const badge = document.getElementById("cart-badge");
 
       if (user) {
         const uid = user.uid;
@@ -173,28 +175,35 @@
         const data = snap.exists ? snap.data() : userData;
 
         memberArea.innerHTML = `
-          <span class="welcome-text">👋 ${data.name || data.email}</span>
-          <a href="#" id="logout-btn" class="logout-link">登出</a>
+          <div class="member-menu">
+            <span id="member-toggle" class="welcome-text">
+              👋 ${ data.name || data.email } ▾
+            </span>
+
+            <div id="member-dropdown" class="member-dropdown d-none">
+              <a href="/profile/">我的帳戶</a>
+              <a href="/orders/">購買紀錄</a>
+              <a href="/favorites/">我的最愛</a>
+              <a href="#" id="logout-btn">登出</a>
+            </div>
+          </div>
         `;
-
-        document.getElementById("logout-btn").onclick = () => auth.signOut();
-
-      
-        const token = await user.getIdToken();
-        fetch("/api/cart/", {
-          headers: {
-            "Authorization": "Bearer " + token
-          }
-        })
-        .then(res => res.json())
-        .then(cart => {
-          if (cart.length > 0) {
-            const badge = document.getElementById("cart-badge");
-            badge.classList.remove("d-none");
-            badge.innerText = cart.length;
+        const toggle = document.getElementById("member-toggle");
+        const dropdown = document.getElementById("member-dropdown");
+        toggle.onclick = () => {
+          dropdown.classList.toggle("d-none");
+        };
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest(".member-menu")) {
+            dropdown.classList.add("d-none");
           }
         });
 
+        document.getElementById("logout-btn").onclick = async () => {
+          auth.signOut();window.location.href = "/login/";
+        }
+        updateCartBadge();
+      
       } else {
         memberArea.innerHTML = `
           <a href="/login/">
@@ -206,6 +215,42 @@
       }
     });
   </script>
+  <script>
+    async function updateCartBadge() {
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+
+        const token = await user.getIdToken();
+
+        const res = await fetch("/api/cart/", {
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        });
+
+        if (!res.ok) return;
+
+        const cart = await res.json();
+        const badge = document.getElementById("cart-badge");
+        if (!badge) return;
+
+        if (cart.length > 0) {
+          const totalQty = cart.reduce(
+            (sum, item) => sum + item.quantity,
+            0
+          );
+          badge.classList.remove("d-none");
+          badge.innerText = totalQty;
+        } else {
+          badge.classList.add("d-none");
+        }
+      } catch (err) {
+        console.error("更新購物車數量失敗", err);
+      }
+    }
+    </script>
+
   {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>

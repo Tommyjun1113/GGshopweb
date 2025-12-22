@@ -6,7 +6,7 @@ window.productsData = [
     
     {
       id: "shoes",
-      sku: "nike-black",
+      sku: "1",
       title: "NIKE 球鞋（黑色）",
       price: 1990,
       images: [
@@ -30,7 +30,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "nike-brown",
+      sku: "2",
       title: "NIKE 球鞋（棕色）",
       price: 1990,
       images: [
@@ -54,7 +54,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "nike-gd",
+      sku: "3",
       title: "NIKE 球鞋（GD款）",
       price: 1990,
       images: [
@@ -78,7 +78,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "nike-gray",
+      sku: "4",
       title: "NIKE 球鞋（灰色）",
       price: 1990,
       images: [
@@ -102,7 +102,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "nike-red",
+      sku: "5",
       title: "NIKE 球鞋（紅色）",
       price: 1990,
       images: [
@@ -126,7 +126,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "nike-special",
+      sku: "6",
       title: "NIKE 球鞋（特別款）",
       price: 1990,
       images: [
@@ -155,7 +155,7 @@ window.productsData = [
 
     {
       id: "shoes",
-      sku: "puma-black",
+      sku: "7",
       title: "PUMA 球鞋（黑色）",
       price: 1990,
       images: [
@@ -179,7 +179,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "puma-blue",
+      sku: "9",
       title: "PUMA 球鞋（藍色）",
       price: 1990,
       images: [
@@ -203,7 +203,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "puma-brown",
+      sku: "8",
       title: "PUMA 球鞋（棕色）",
       price: 1990,
       images: [
@@ -227,7 +227,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "puma-gray",
+      sku: "10",
       title: "PUMA 球鞋（灰色）",
       price: 1990,
       images: [
@@ -251,7 +251,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "puma-pink",
+      sku: "12",
       title: "PUMA 球鞋（粉色）",
       price: 1990,
       images: [
@@ -275,7 +275,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "puma-red",
+      sku: "11",
       title: "PUMA 球鞋（紅色）",
       price: 1990,
       images: [
@@ -304,7 +304,7 @@ window.productsData = [
 
     {
       id: "shoes",
-      sku: "adidas-black",
+      sku: "13",
       title: "ADIDAS 球鞋（黑色）",
       price: 1990,
       images: [
@@ -328,7 +328,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "adidas-blue",
+      sku: "15",
       title: "ADIDAS 球鞋（藍色）",
       price: 1990,
       images: [
@@ -352,7 +352,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "adidas-gray",
+      sku: "16",
       title: "ADIDAS 球鞋（灰色）",
       price: 1990,
       images: [
@@ -376,7 +376,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "adidas-green",
+      sku: "14",
       title: "ADIDAS 球鞋（綠色）",
       price: 1990,
       images: [
@@ -400,7 +400,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "adidas-pink",
+      sku: "18",
       title: "ADIDAS 球鞋（粉色）",
       price: 1990,
       images: [
@@ -424,7 +424,7 @@ window.productsData = [
     },
     {
       id: "shoes",
-      sku: "adidas-red",
+      sku: "17",
       title: "ADIDAS 球鞋（紅色）",
       price: 1990,
       images: [

@@ -8,15 +8,23 @@
 {% block content %}
 <h1 class="cart-title">購物車</h1>
 
+<div class="cart-toolbar">
+  <label>
+    <input type="checkbox" id="selectAll"> 全選
+  </label>
+  <button id="deleteSelected" class="btn-clear" disabled>
+    刪除選取商品
+  </button>
+</div>
+
 <div class="cart-page">
   <div id="cart-container" class="cart-container"></div>
-
-  <div id="cart-footer" class="cart-footer" style="display:none;">
-    <a href="/shop/" class="cart-back">← 繼續購物</a>
-
+  <a href="/shop/" class="cart-back">← 繼續購物</a>
+  
     <div class="cart-summary">
       <div class="row">
-        <span>商品小計</span><span id="cart-subtotal">NT$ 0</span>
+        <span>商品小計</span>
+        <span id="cart-subtotal">NT$ 0</span>
       </div>
 
       <div id="coupon-row" class="coupon-row" style="display:none;">
@@ -25,69 +33,100 @@
           <span>優惠折扣</span>
           <span>- <span id="cart-discount">NT$ 0</span></span>
         </div>
-        <button id="coupon-cancel" class="coupon-cancel" type="button">取消</button>
       </div>
 
       <div class="row total">
-        <span>結帳金額</span><span id="cart-final-total">NT$ 0</span>
+        <span>結帳金額</span>
+        <span id="cart-final-total">NT$ 0</span>
       </div>
 
       <div class="cart-hint">※ 實際結帳金額將於結帳頁再次確認</div>
 
-      <button id="checkoutBtn" class="btn-checkout" type="button">前往結帳</button>
+      <button id="checkoutBtn" class="btn-checkout" disabled type="button">
+        前往結帳
+      </button>
     </div>
-  </div>
-
-  <p id="cart-empty" class="cart-empty" style="display:none;">購物車是空的</p>
+    <p id="cart-empty" class="cart-empty" style="display:none;">
+      購物車是空的
+    </p>
 </div>
 {% endblock content %}
 
 {% block extra_js %}
 <script>
-let cartSubtotal = 0;
-let selectedCoupon = null;
 let authToken = null;
+let cartItems = [];
+let selectedIds = new Set();
+let selectedCoupon = null;
 
-auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    window.location.href = "/login/";
-    return;
-  }
+/* =============================
+   等待 Firebase 登入
+============================= */
+function waitForAuth() {
+  return new Promise(resolve => {
+    const unsub = auth.onAuthStateChanged(user => {
+      if (user) {
+        unsub();
+        resolve(user);
+      }
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const user = await waitForAuth();
   authToken = await user.getIdToken();
-  loadCart();
+  await loadCart();
 });
 
+/* =============================
+   載入購物車
+============================= */
 async function loadCart() {
   const res = await fetch("/api/cart/", {
     headers: { Authorization: "Bearer " + authToken }
   });
-  const cartItems = await res.json();
+
+  cartItems = await res.json();
 
   if (!cartItems.length) {
     document.getElementById("cart-empty").style.display = "block";
-    document.getElementById("cart-footer").style.display = "none";
+    document.getElementById("cart-container").innerHTML = "";
+    selectedIds.clear();
+    recalc();
+    updateActionState();
     return;
   }
 
-  renderCart(cartItems);
+  selectedIds.clear();
+  document.getElementById("selectAll").checked = false;
+
+  renderCart();
+  recalc();
+  updateActionState();
   await loadBestCoupon();
 }
 
-function renderCart(items) {
+/* =============================
+   Render Cart
+============================= */
+function renderCart() {
   const container = document.getElementById("cart-container");
-  const footer = document.getElementById("cart-footer");
-
-  cartSubtotal = 0;
   container.innerHTML = "";
 
-  items.forEach(item => {
+  cartItems.forEach(item => {
     const subtotal = item.price * item.quantity;
-    cartSubtotal += subtotal;
 
     container.innerHTML += `
       <div class="cart-item">
+        <input type="checkbox"
+          class="cart-check"
+          data-id="${item.id}"
+          ${selectedIds.has(item.id) ? "checked" : ""}
+        >
+
         <div class="cart-img">
-          <img src="/static/products/${item.imageKey}.png" alt="${item.productName}">
+          <img src="/static/products/${item.imageKey}.png">
         </div>
 
         <div class="cart-body">
@@ -97,57 +136,170 @@ function renderCart(items) {
           </div>
 
           <div class="cart-meta">
-            <div class="meta-row"><span class="label">單價</span><span class="value">NT$ ${item.price}</span></div>
-            <div class="meta-row"><span class="label">數量</span><span class="value">${item.quantity}</span></div>
-            <div class="meta-row meta-strong"><span class="label">小計</span><span class="value">NT$ ${subtotal}</span></div>
+            <div class="meta-row">
+              <span>單價</span><span>NT$ ${item.price}</span>
+            </div>
+
+            <div class="meta-row">
+              <span>數量</span>
+              <div class="qty-control">
+                <button class="qty-btn" data-id="${item.id}" data-action="minus">−</button>
+                <span class="qty-num">${item.quantity}</span>
+                <button class="qty-btn" data-id="${item.id}" data-action="plus">＋</button>
+              </div>
+            </div>
+
+            <div class="meta-row meta-strong">
+              <span>小計</span><span>NT$ ${subtotal}</span>
+            </div>
           </div>
         </div>
       </div>
     `;
   });
-
-  document.getElementById("cart-subtotal").innerText = `NT$ ${cartSubtotal}`;
-  footer.style.display = "block";
 }
 
+/* =============================
+   勾選 / 全選
+============================= */
+document.addEventListener("change", e => {
+  if (e.target.classList.contains("cart-check")) {
+    const id = e.target.dataset.id;
+    e.target.checked ? selectedIds.add(id) : selectedIds.delete(id);
+    syncSelectAll();
+    recalc();
+    updateActionState();
+  }
+
+  if (e.target.id === "selectAll") {
+    selectedIds.clear();
+    document.querySelectorAll(".cart-check").forEach(cb => {
+      cb.checked = e.target.checked;
+      if (e.target.checked) selectedIds.add(cb.dataset.id);
+    });
+    recalc();
+    updateActionState();
+  }
+});
+
+function syncSelectAll() {
+  document.getElementById("selectAll").checked =
+    selectedIds.size === document.querySelectorAll(".cart-check").length;
+}
+
+/* =============================
+   加減數量
+============================= */
+document.addEventListener("click", async e => {
+  if (!e.target.classList.contains("qty-btn")) return;
+
+  const id = e.target.dataset.id;
+  const action = e.target.dataset.action;
+
+  const item = cartItems.find(i => i.id === id);
+  if (!item) return;
+
+  const newQty = action === "plus"
+    ? item.quantity + 1
+    : item.quantity - 1;
+
+  if (newQty < 1) return;
+
+  await fetch(`/api/cart/update/${id}/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + authToken
+    },
+    body: JSON.stringify({ quantity: newQty })
+  });
+
+  item.quantity = newQty;
+  renderCart();
+  recalc();
+});
+
+/* =============================
+   金額計算（只算勾選）
+============================= */
+function recalc() {
+  let subtotal = 0;
+
+  cartItems.forEach(item => {
+    if (selectedIds.has(item.id)) {
+      subtotal += item.price * item.quantity;
+    }
+  });
+
+  document.getElementById("cart-subtotal").innerText = `NT$ ${subtotal}`;
+
+  let total = subtotal;
+  if (selectedCoupon) {
+    total = Math.max(subtotal - selectedCoupon.value, 0);
+  }
+
+  document.getElementById("cart-final-total").innerText = `NT$ ${total}`;
+}
+
+/* =============================
+   最佳優惠券
+============================= */
 async function loadBestCoupon() {
   const res = await fetch("/api/coupons/best", {
     headers: { Authorization: "Bearer " + authToken }
   });
 
-  if (!res.ok) {
-    updateFinalTotal(cartSubtotal);
-    return;
-  }
+  if (!res.ok) return;
 
   const data = await res.json();
-  if (data.bestCoupon) applyCoupon(data.bestCoupon);
-  else updateFinalTotal(cartSubtotal);
-}
+  if (!data.bestCoupon) return;
 
-function applyCoupon(coupon) {
-  selectedCoupon = coupon;
-
+  selectedCoupon = data.bestCoupon;
   document.getElementById("coupon-row").style.display = "block";
   document.getElementById("coupon-text").innerText =
-    `系統已為你套用優惠券：${coupon.title}`;
-  document.getElementById("cart-discount").innerText = `NT$ ${coupon.value}`;
-
-  updateFinalTotal(cartSubtotal - coupon.value);
+    `系統已為你套用優惠券：${selectedCoupon.title}`;
+  document.getElementById("cart-discount").innerText =
+    `NT$ ${selectedCoupon.value}`;
 }
 
-document.getElementById("coupon-cancel").addEventListener("click", () => {
-  selectedCoupon = null;
-  document.getElementById("coupon-row").style.display = "none";
-  updateFinalTotal(cartSubtotal);
-});
-
-function updateFinalTotal(amount) {
-  document.getElementById("cart-final-total").innerText = `NT$ ${amount}`;
+function updateActionState() {
+  const canAction = selectedIds.size > 0;
+  document.getElementById("checkoutBtn").disabled = !canAction;
+  document.getElementById("deleteSelected").disabled = !canAction;
 }
 
-document.getElementById("checkoutBtn").addEventListener("click", () => {
+/* =============================
+   前往結帳（只送勾選）
+============================= */
+document.getElementById("deleteSelected").onclick = async () => {
+  if (!selectedIds.size) return;
+
+  if (!confirm("確定要刪除選取的商品嗎？")) return;
+
+  await fetch("/api/cart/delete-batch/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + authToken
+    },
+    body: JSON.stringify({ ids: [...selectedIds] })
+  });
+  selectedIds.clear();
+  document.getElementById("selectAll").checked = false;
+  await loadCart();   
+};
+
+document.getElementById("checkoutBtn").onclick = () => {
+  if (!selectedIds.size) {
+    alert("請先選擇商品");
+    return;
+  }
+  sessionStorage.setItem(
+    "checkoutItems",
+    JSON.stringify([...selectedIds])
+  );
+
   window.location.href = "/checkout/";
-});
+};
 </script>
 {% endblock extra_js %}

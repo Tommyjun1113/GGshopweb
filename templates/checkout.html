@@ -24,33 +24,34 @@
 </div>
 
 <hr>
+<div class="checkout-flow">
 
-<h2>付款方式</h2>
+  <h2>付款方式</h2>
 
-<label>
-  <input type="radio" name="payment" value="COD" checked>
-  貨到付款
-</label>
-<br>
+  <label>
+    <input type="radio" name="payment" value="COD" checked>
+    貨到付款
+  </label>
+  <br>
 
-<label>
-  <input type="radio" name="payment" value="CREDIT">
-  信用卡
-</label>
-<br>
+  <label>
+    <input type="radio" name="payment" value="CREDIT">
+    信用卡
+  </label>
+  <br>
 
-<label>
-  <input type="radio" name="payment" value="LINEPAY">
-  LINE Pay
-</label>
+  <label>
+    <input type="radio" name="payment" value="LINEPAY">
+    LINE Pay
+  </label>
 
-<!-- 付款 / 收件資訊 -->
-<div id="payment-form" class="payment-form"></div>
+  <!-- 付款 / 收件資訊 -->
+  <div id="payment-form" class="payment-form"></div>
 
-<button id="submitOrder" class="btn-submit">
-  確認下單
-</button>
-
+  <button id="submitOrder" class="btn-submit">
+    確認下單
+  </button>
+</div>
 {% endblock content %}
 
 {% block extra_js %}
@@ -81,6 +82,7 @@ auth.onAuthStateChanged(async (user) => {
 // 讀取購物車
 // =============================
 async function loadCart() {
+  const token = await auth.currentUser.getIdToken();
   const res = await fetch("/api/cart/", {
     headers: { Authorization: "Bearer " + authToken }
   });
@@ -105,15 +107,30 @@ function renderItems() {
   subtotal = 0;
 
   cartItems.forEach(item => {
+    const price = Number(item.price) || 0;
+    const quantity = Number(item.quantity) || 1;
     const itemSubtotal = item.price * item.quantity;
     subtotal += itemSubtotal;
 
+    const productName = item.productName || "未命名商品";
+    const size = item.size || "-";
+    const imageKey = item.imageKey
+      ? `/static/products/${item.imageKey}.png`
+      : `/static/products/GGicon.png`;
+
     container.innerHTML += `
-      <div class="order-item">
-        <div>${item.productName}</div>
-        <div>尺寸：${item.size}</div>
-        <div>數量：${item.quantity}</div>
-        <div>NT$ ${itemSubtotal}</div>
+     <div class="order-item">
+        <img
+          src="/static/products/${item.imageKey}.png"
+          class="order-img"
+          alt="${item.productName}"
+        >
+        <div class="order-info">
+          <div class="order-name">${item.productName}</div>
+          <div>尺寸：${item.size}</div>
+          <div>數量：${item.quantity}</div>
+          <div>NT$ ${itemSubtotal}</div>
+        </div>
       </div>
     `;
   });

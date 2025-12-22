@@ -1,5 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+  function getCSRFToken() {
+  return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
   // =============================
   // 取得 SKU & 商品
   // =============================
@@ -106,21 +110,26 @@ addToCartBtn.addEventListener("click", async function () {
     alert("請先選擇尺寸");
     return;
   }
-
+  const imageKey = product.images[0]
+  .split("/")
+  .pop()
+  .replace(".png", "");
   const payload = {
     productId: product.sku,
     productName: product.title,
     price: product.price,
     quantity: parseInt(qtyEl.innerText, 10),
     size: sizeSelect.value,
-    imageKey: product.images[0],
+    imageKey: imageKey,
+    
     createdAt: Date.now()
   };
-
+  const token = await auth.currentUser.getIdToken();
   const res = await fetch("/api/cart/add/", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+       Authorization: "Bearer " + token
     },
     body: JSON.stringify(payload)
   });
@@ -128,9 +137,42 @@ addToCartBtn.addEventListener("click", async function () {
   const data = await res.json();
 
   if (data.success) {
+    await updateCartBadge();
     alert("已加入購物車");
   } else {
     alert("加入失敗，請先登入");
   }
 });
+
+async function updateCartBadge() {
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const token = await user.getIdToken();
+
+    const res = await fetch("/api/cart/", {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    if (!res.ok) return;
+
+    const cart = await res.json();
+    const badge = document.getElementById("cart-badge");
+    if (!badge) return;
+
+    if (cart.length > 0) {
+      const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+      badge.classList.remove("d-none");
+      badge.innerText = totalQty;
+    } else {
+      badge.classList.add("d-none");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 });

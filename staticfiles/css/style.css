@@ -30,8 +30,8 @@
   }
   .cart-img {
     grid-column: 2;
-    width: 96px;
-    height: 96px;          
+    width: 120px !important;
+    height: 130px !important;          
     flex-shrink: 0;
     border-radius: 10px;
     overflow: hidden;
@@ -48,6 +48,7 @@
     display: flex;
     text-align: left;
     align-self: start;
+    margin-left: 20px;
     flex-direction: column;
     min-width: 0;
     gap: 8px;
@@ -84,16 +85,16 @@
     white-space: normal;
   }
   .cart-meta .meta-strong {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 80px 1fr;
-    margin-top: 10px;
-    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    padding-top: 8px;
+    margin-top: 8px;
     border-top: 1px solid #eee;
-    font-weight: 600;
   }
   .cart-meta .meta-strong span:last-child {
-    font-size: 16px;
+    white-space: nowrap !important;  
+    font-weight: 600;
+    font-size: 15px;
   }
   .cart-summary {
     max-width: 480px;
@@ -510,8 +511,8 @@
   }
   .cart-img {
     grid-column: 2;
-    width: 96px;
-    height: 96px;          
+    width: 110px !important;
+    height: 120px !important;          
     flex-shrink: 0;
     border-radius: 10px;
     overflow: hidden;
@@ -529,6 +530,7 @@
     flex: 1;
     display: flex;
     text-align: left;
+    margin-left: 20px;
     align-self: start;
     flex-direction: column;
     min-width: 0;
@@ -563,16 +565,29 @@
   }
   .cart-meta span:first-child {
     color: #666;
-    justify-content: flex-start;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+  .cart-meta span:last-child {
     font-size: 14px;
   }
   .cart-meta .meta-row:nth-child(2) {
-    justify-content: flex-start;
-    align-items: center;
+    white-space: nowrap !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
   }
-  .cart-meta span:last-child {
-    text-align: left !important;
-    white-space: normal !important;
+  
+  .cart-meta .meta-strong {
+    display: flex;
+    align-items: center;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+  }
+  .cart-meta .meta-strong span:last-child { 
+    white-space: nowrap !important;  
+    font-weight: 600;
+    font-size: 15px;
   }
   .qty-control{
     display: inline-flex;

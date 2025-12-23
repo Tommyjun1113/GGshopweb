@@ -127,9 +127,9 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -138,8 +138,11 @@
       projectId: "shopping-54704",
     };
 
+    if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    }
+
+    window.auth = firebase.auth(); // 🔥 掛到 window
   </script>
 
   <script>

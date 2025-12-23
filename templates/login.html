@@ -54,7 +54,7 @@
             <button class="social-btn line" type="button">
                 <img src="{% static 'icons/line.svg' %}">
             </button>
-            <button id="google-login-btn" class="social-btn" type="button">
+            <button id="google-login-btn" class="social-btn" type="button" >
                 <img src="{% static 'icons/google.svg' %}">
             </button>
         </div>
@@ -229,58 +229,42 @@ function goForgotStep2() {
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-  // 0) Firebase init
-  if (!firebase.apps.length) {
-    firebase.initializeApp({
-      apiKey: "AIzaSyDQIC_jH4wQguSTnvmy2gdl3TyJcO-lXME",
-      authDomain: "shopping-54704.firebaseapp.com",
-      projectId: "shopping-54704",
-    });
-  }
-
-  const auth = firebase.auth();
-  let loginHandled = false; // ✅ 防止重複送後端
+  const auth = window.auth;
+  let sent = false;
 
   async function sendTokenToBackend(user) {
-    if (!user) return;
-    if (loginHandled) return;
-    loginHandled = true;
+    if (!user || sent) return;
+    sent = true;
 
-    try {
-      const token = await user.getIdToken(true); 
+    const token = await user.getIdToken();
 
-      const res = await fetch("/api/firebase-login/", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content,
-        },
-        body: JSON.stringify({ token }),
-      });
+    const res = await fetch("/api/firebase-login/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector(
+          'meta[name="csrf-token"]'
+        ).content,
+      },
+      body: JSON.stringify({ token }),
+    });
 
-      const data = await res.json();
-
-      if (data.success) {
-        window.location.replace("/GGshopping/");
-      } else {
-        loginHandled = false;
-        showError("login-error", "登入失敗（後端）");
-      }
-    } catch (err) {
-      console.error("❌ sendTokenToBackend error:", err);
-      loginHandled = false;
-      showError("login-error", "登入失敗，請稍後再試");
+    const data = await res.json();
+    if (data.success) {
+      window.location.replace("/GGshopping/");
+    }else {
+      console.error("backend login failed", data);
     }
   }
-
-  // ✅ 唯一入口：任何登入成功（Email/Google/Redirect回來）都會進這裡
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) return;
-    console.log("✅ Firebase 登入完成:", user.email);
-    await sendTokenToBackend(user);
-  });
-
+  try {
+    const result = await auth.getRedirectResult();
+    if (result && result.user) {
+      await sendTokenToBackend(result.user);
+    }
+  } catch (err) {
+    console.error("redirect error", err);
+    alert(err.message);
+  }
   // 1) Email/密碼登入：只做 Firebase 登入，不打後端（交給 onAuthStateChanged）
   document.getElementById("email-login-btn").onclick = async () => {
     hideError("login-error");
@@ -302,6 +286,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       await auth.signInWithEmailAndPassword(email, password);
+      window.location.replace("/GGshopping/");
       // ✅ 成功後不做任何事，onAuthStateChanged 會自動處理
     } catch (err) {
       showError("login-error", firebaseErrorToMessage(err));
@@ -309,15 +294,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       passwordInput.classList.add("input-error");
     }
   };
-
-  // 2) Google 登入：redirect
-  document.getElementById("google-login-btn").addEventListener("click", () => {
-    console.log("🔥 Google 按鈕點擊");
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-    auth.signInWithRedirect(provider);
-  });
-
   // 3) LINE 登入
   const lineBtn = document.querySelector(".social-btn.line");
   if (lineBtn) {
@@ -325,6 +301,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.location.href = "/api/auth/line/login/";
     });
   }
+});
+</script>
+<script>
+document.getElementById("google-login-btn").addEventListener("click", () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+
+  // ✅ 用 redirect（不是 popup）
+  firebase.auth().signInWithRedirect(provider);
 });
 </script>
 

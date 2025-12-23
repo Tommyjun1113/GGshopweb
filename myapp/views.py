@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import login
+from django.contrib.auth import login,get_user_model
 from django.contrib.auth.models import User
 
 import json
@@ -61,6 +61,7 @@ def favorites_page(request):
 def order_success_page(request):
     return render(request, "order_success.html")
 
+User = get_user_model()
 @csrf_exempt
 def firebase_login(request):
     init_firebase()
@@ -74,7 +75,27 @@ def firebase_login(request):
         decoded = firebase_auth.verify_id_token(token,clock_skew_seconds=10)
         uid = decoded["uid"]
         email = decoded.get("email", f"{uid}@firebase.local")
+        if not email:
+            return JsonResponse(
+                {"success": False, "error": "No email in token"},
+                status=400
+            )
+        
+        user, created = User.objects.get_or_create(
+            username=f"firebase_{uid}",
+            defaults={
+                "email": email,
+            }
+        )
 
+        # 若 email 有更新，補上
+        if user.email != email:
+            user.email = email
+            user.save()
+
+        # ✅ 2️⃣ 關鍵：登入 Django（建立 session）
+        login(request, user)
+        
         db = get_db()
         db.collection("users").document(uid).set({
             "uid": uid,

@@ -48,6 +48,12 @@ urlpatterns = [
     path("api/cart/add/", views.api_cart_add),
     path("api/cart/update/<str:cart_id>/",views.api_cart_update),
     path("api/cart/delete/<str:cart_id>/", views.api_cart_delete),
+<<<<<<< HEAD
+=======
+    path("api/cart/delete-batch/", views.api_cart_delete_batch),
+    path("api/coupons/best", views.api_best_coupon),
+    path("api/checkout/prepare/", views.api_checkout_prepare),
+>>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
     path("checkout/",views.checkout),
 
     path("orders/",views.orders_page, name="orders"),

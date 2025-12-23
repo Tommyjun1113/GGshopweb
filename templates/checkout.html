@@ -24,6 +24,7 @@
 </div>
 
 <hr>
+<<<<<<< HEAD
 
 <h2>付款方式</h2>
 
@@ -51,6 +52,36 @@
   確認下單
 </button>
 
+=======
+<div class="checkout-flow">
+
+  <h2>付款方式</h2>
+
+  <label>
+    <input type="radio" name="payment" value="COD" checked>
+    貨到付款
+  </label>
+  <br>
+
+  <label>
+    <input type="radio" name="payment" value="CREDIT">
+    信用卡
+  </label>
+  <br>
+
+  <label>
+    <input type="radio" name="payment" value="LINEPAY">
+    LINE Pay
+  </label>
+
+  <!-- 付款 / 收件資訊 -->
+  <div id="payment-form" class="payment-form"></div>
+
+  <button id="submitOrder" class="btn-submit">
+    確認下單
+  </button>
+</div>
+>>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
 {% endblock content %}
 
 {% block extra_js %}
@@ -264,4 +295,8 @@ document.getElementById("submitOrder").addEventListener("click", async () => {
   }
 });
 </script>
+<<<<<<< HEAD
 {% endblock extra_js %}
+=======
+{% endblock extra_js %}
+>>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53

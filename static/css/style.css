@@ -10,17 +10,100 @@
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
-
-  /* ===== 購物車 ===== */
+  .cart-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px 120px;
+  }
   .cart-item {
-    grid-template-columns: 1fr;
-    gap: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .cart-img {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+  .cart-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .cart-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .cart-name {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .cart-size {
+    font-size: 14px;
+    color: #666;
+  }
+  .cart-meta {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    row-gap: 6px;
+    column-gap: 16px;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .cart-meta span:first-child {
+    color: #666;
+    white-space: nowrap;
   }
 
+  .cart-meta span:last-child {
+    text-align: right;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .cart-meta .meta-strong {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    font-weight: 600;
+  }
+  .cart-meta .meta-strong span:last-child {
+    font-size: 16px;
+  }
+  .cart-summary {
+    max-width: 480px;
+    margin: 32px auto 0;
+    padding: 20px;
+  }
+  .cart-back {
+    display: block;
+    max-width: 480px;
+    margin: 20px auto;
+    font-size: 14px;
+  }
+  .cart-container {
+   max-width: 100%;     
+   margin: 0 auto;
+  }
   .cart-qty {
     justify-content: flex-start;
   }
-
+  .cart-footer {
+    position: static;
+    width: 100%;
+    margin-top: 24px;
+  }
   /* ===== 商品內頁 ===== */
   .main-wrapper {
     display: flex !important;
@@ -374,74 +457,100 @@
     padding: 0 16px 160px; /* 底部要更大一點 */
   }
 
-  /* 手機：卡片改成直向 */
+  
   .cart-item{
-    flex-direction: column;
-    gap: 0;
-    border-radius: 18px;
+    display: flex !important;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid #eee;
   }
-
-  /* 圖片滿版：用比例撐開 */
-  .cart-img{
+  .cart-img {
+    width: 96px;
+    height: 96px;          
+    flex-shrink: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+  .cart-img img {
     width: 100%;
-    flex: none;
-    aspect-ratio: 1 / 1;   /* ✅ 你要的「跟手機寬度適應」 */
-  }
-
-  .cart-img img{
     height: 100%;
+    object-fit: cover; 
   }
 
   /* 內容區：上下排 */
   .cart-body{
+    flex: 1;
+    display: flex;
     flex-direction: column;
-    padding: 16px;
-    gap: 14px;
+    gap: 8px;
   }
 
-  .cart-info{
-    min-width: 0;
+  .cart-info {
+    gap: 4px;
+  }
+  .cart-name {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: normal;
+    word-break: keep-all;     
+    line-height: 1.4;
+  }
+  .cart-size {
+    font-size: 13px;
+    color: #666;
   }
 
-  /* 金額區塊：像你要的那種表格 */
   .cart-meta{
-    min-width: 0;
-    background: #fafafa;
-    border: 1px solid #eee;
-    border-radius: 14px;
-    padding: 12px 12px;
-  }
-
-  .meta-row{
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    row-gap: 6px;
+    column-gap: 12px;
     font-size: 14px;
+    margin-top: 4px;
+  }
+  .cart-meta span:first-child {
+    color: #666;
+    white-space: nowrap;
   }
 
-  .meta-strong{
+  .cart-meta span:last-child {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .cart-meta .meta-strong {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid #e7e7e7;
+    border-top: 1px solid #eee;
+    font-weight: 600;
   }
-
-  /* Footer 手機：上下堆疊、按鈕滿版 */
-  .cart-footer{
-    flex-direction: column;
-    gap: 14px;
+  .cart-meta .meta-strong span:last-child {
+    font-size: 15px;
   }
-
-  .cart-summary{
-    width: 100%;
+  .cart-summary {
+    max-width: 420px;
+    margin: 24px auto 0;
+    padding: 16px;
   }
 
   .cart-back{
-    width: 100%;
-    text-align: center;
-    padding: 14px 0;
+    display: block;
+    max-width: 420px;    
+    margin: 16px auto;
+    text-align: left;    
+    font-size: 14px;
   }
   .new-price {
     font-size: 22px;
   }
-  
-  .buy-btn {
+  .btn-checkout {
     width: 100%;
+    font-size: 16px;
   }
   .profile-layout {
     flex-direction: column;

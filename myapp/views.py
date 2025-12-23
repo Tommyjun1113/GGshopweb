@@ -345,6 +345,24 @@ def api_cart_delete(request, cart_id):
         .delete()
 
     return JsonResponse({"success": True})
+
+@csrf_exempt
+@require_POST
+def api_cart_delete_batch(request):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    body = json.loads(request.body or "{}")
+    ids = body.get("ids", [])
+
+    db = get_db()
+    cart_ref = db.collection("users").document(uid).collection("cart")
+
+    for cart_id in ids:
+        cart_ref.document(cart_id).delete()
+
+    return JsonResponse({"success": True})
 def api_best_coupon(request):
     uid = get_uid_from_request(request)
     if not uid:
@@ -369,6 +387,30 @@ def api_best_coupon(request):
         "cartTotal": total,
         "bestCoupon": best
     })
+
+@csrf_exempt
+@require_POST
+def api_checkout_prepare(request):
+    uid = get_uid_from_request(request)
+    body = json.loads(request.body)
+    cart_ids = body.get("cartIds", [])
+
+    db = get_db()
+    docs = db.collection("users").document(uid).collection("cart") \
+        .where(firestore.FieldPath.document_id(), "in", cart_ids) \
+        .stream()
+
+    items = []
+    subtotal = 0
+    for d in docs:
+        item = d.to_dict()
+        items.append(item)
+        subtotal += item["price"] * item["quantity"]
+
+    request.session["checkout_items"] = items
+    request.session["checkout_subtotal"] = subtotal
+
+    return JsonResponse({"success": True})
 
 
 

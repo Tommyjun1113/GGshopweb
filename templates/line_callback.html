@@ -28,13 +28,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!token) {
     alert("LINE 登入失敗，缺少 Firebase token");
+<<<<<<< HEAD
     window.location.href = "https://192.168.59.19:8080/login/"; /*"https://ggshopweb.onrender.com/login/"*/
+=======
+    window.location.href = "https://ggshopweb.onrender.com/login/";
+>>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
     return;
   }
 
   
   firebase.auth().signInWithCustomToken(token)
     .then(() => {
+<<<<<<< HEAD
       const user = firebase.auth().currentUser;
     const idToken = await user.getIdToken();
 
@@ -59,11 +64,18 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "/login/";
     }
   })
+=======
+      window.location.href = "https://ggshopweb.onrender.com/GGshopping/";
+>>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
     })
     .catch(err => {
       console.error(err);
       alert("LINE 登入失敗：" + err.message);
+<<<<<<< HEAD
       window.location.href = "https://192.168.59.19:8080/login/";
+=======
+      window.location.href = "https://ggshopweb.onrender.com/login/";
+>>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
     });
 });
 </script>

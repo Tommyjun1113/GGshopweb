@@ -3,15 +3,6 @@
     font-size: 26px;
     font-weight: 600;
     margin: 30px 0;
-<<<<<<< HEAD
-}
-
-/* ====== 容器 ====== */
-.cart-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-=======
     justify-self: center;
 }
 .select-all {
@@ -99,27 +90,18 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px 60px; 
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
 }
 
 /* ====== 單一商品 ====== */
 .cart-item {
     display: grid;
-<<<<<<< HEAD
-    grid-template-columns: 120px 1fr 120px 120px 140px;
-=======
     grid-template-columns: 32px 120px 1fr;
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
     align-items: center;
     gap: 20px;
     padding: 20px;
     background: #fff;
-<<<<<<< HEAD
-    border: 1px solid #e5e5e5;
-=======
     border: none;
     border-bottom: 1px solid #eee;
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
 }
 
 /* ====== 商品圖 ====== */
@@ -189,13 +171,6 @@
 
 /* ====== 總金額 ====== */
 .cart-summary {
-<<<<<<< HEAD
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 2px solid #000;
-}
-
-=======
     max-width: 480px;
     border: 1px solid #f0f0f0;
     margin-left: auto;   
@@ -218,7 +193,6 @@
     font-size:22px;
     font-weight: 700;
 }
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
 .cart-total {
     font-size: 20px;
     font-weight: bold;
@@ -246,13 +220,6 @@
 }
 
 .btn-clear {
-<<<<<<< HEAD
-    border: 1px solid #ccc;
-    color: #333;
-}
-
-.btn-checkout {
-=======
     padding: 8px 14px;
     border-radius: 8px;
     border: 1px solid #ddd;
@@ -274,7 +241,6 @@
     margin-top: 12px;
     font-size: 17px;
     letter-spacing: 1px;
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
     background: #000;
     color: #fff;
 }
@@ -288,33 +254,15 @@
     display: inline-block;
     margin-top: 10px;
     text-decoration: none;
-<<<<<<< HEAD
-    color: #333;
-}
-
-/* ====== 空購物車 ====== */
-=======
     color: #777;
     font-size: 14px;
 }
 
 
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
 .cart-empty {
     font-size: 18px;
     margin: 40px 0;
 }
-<<<<<<< HEAD
-/* 底部整體 */
-.cart-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: 40px;
-}
-
-/* 左邊：繼續購物 */
-=======
 
 .cart-footer {
     justify-self: left;
@@ -324,7 +272,6 @@
 }
 
 
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
 .cart-footer-left {
     font-size: 14px;
 }
@@ -336,46 +283,17 @@
 
 
 .cart-back {
-<<<<<<< HEAD
-    color: #333;
-=======
     display: inline-block;
     margin: 12px 0 24px;
     font-size: 14px;
     font-weight: 500;
     color: #000;
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
     text-decoration: none;
 }
 
 .cart-back:hover {
     text-decoration: underline;
 }
-<<<<<<< HEAD
-
-/* 右邊：金額 + 按鈕 */
-.cart-footer-right {
-    text-align: right;
-}
-
-/* 總金額 */
-.cart-total {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.cart-total span {
-    font-size: 22px;
-    margin-left: 10px;
-}
-
-/* 按鈕區 */
-.cart-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-=======
 .qty-control{
     display: inline-flex;
     align-items: center;
@@ -403,7 +321,6 @@
   min-width: 24px;
   text-align: center;
   font-weight: 600;
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
 }
 .cart-hint {
   font-size: 12px;
@@ -415,31 +332,30 @@
   margin-bottom: 4px;
   color: #444;
 }
-<<<<<<< HEAD
-
-/* 清空 */
-.btn-clear {
-    padding: 10px 20px;
-    border: 1px solid #ccc;
-    background: white;
-    color: #333;
-    text-decoration: none;
-}
-
-=======
 button:disabled {
   opacity: .4;
   pointer-events: none;
 }
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
 /* 結帳 */
 .btn-checkout {
     padding: 10px 26px;
     background: black;
     color: white;
     text-decoration: none;
-<<<<<<< HEAD
 }
-=======
+.coupon-hint {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
 }
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
+.coupon-list {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.coupon-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+

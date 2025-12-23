@@ -114,3 +114,9 @@ label {
 .btn-submit:hover {
     opacity: 0.9;
 }
+.error {
+    color: #e53935;
+    font-size: 12px;
+    margin-bottom: 8px;
+    display: block;
+  }

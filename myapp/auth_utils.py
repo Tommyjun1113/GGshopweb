@@ -11,7 +11,7 @@ def get_uid_from_request(request):
             return None
 
         token = auth_header.replace("Bearer ", "")
-        decoded = firebase_auth.verify_id_token(token)
+        decoded = firebase_auth.verify_id_token(token,clock_skew_seconds=5)
         return decoded.get("uid")
 
     except Exception as e:

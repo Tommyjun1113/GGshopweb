@@ -10,19 +10,6 @@
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
-<<<<<<< HEAD
-
-  /* ===== 購物車 ===== */
-  .cart-item {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .cart-qty {
-    justify-content: flex-start;
-  }
-
-=======
   .cart-page {
     max-width: 720px;
     margin: 0 auto;
@@ -117,7 +104,6 @@
     width: 100%;
     margin-top: 24px;
   }
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
   /* ===== 商品內頁 ===== */
   .main-wrapper {
     display: flex !important;
@@ -471,24 +457,6 @@
     padding: 0 16px 160px; /* 底部要更大一點 */
   }
 
-<<<<<<< HEAD
-  /* 手機：卡片改成直向 */
-  .cart-item{
-    flex-direction: column;
-    gap: 0;
-    border-radius: 18px;
-  }
-
-  /* 圖片滿版：用比例撐開 */
-  .cart-img{
-    width: 100%;
-    flex: none;
-    aspect-ratio: 1 / 1;   /* ✅ 你要的「跟手機寬度適應」 */
-  }
-
-  .cart-img img{
-    height: 100%;
-=======
   
   .cart-item{
     display: flex !important;
@@ -509,54 +477,10 @@
     width: 100%;
     height: 100%;
     object-fit: cover; 
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
   }
 
   /* 內容區：上下排 */
   .cart-body{
-<<<<<<< HEAD
-    flex-direction: column;
-    padding: 16px;
-    gap: 14px;
-  }
-
-  .cart-info{
-    min-width: 0;
-  }
-
-  /* 金額區塊：像你要的那種表格 */
-  .cart-meta{
-    min-width: 0;
-    background: #fafafa;
-    border: 1px solid #eee;
-    border-radius: 14px;
-    padding: 12px 12px;
-  }
-
-  .meta-row{
-    font-size: 14px;
-  }
-
-  .meta-strong{
-    padding-top: 8px;
-    border-top: 1px solid #e7e7e7;
-  }
-
-  /* Footer 手機：上下堆疊、按鈕滿版 */
-  .cart-footer{
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .cart-summary{
-    width: 100%;
-  }
-
-  .cart-back{
-    width: 100%;
-    text-align: center;
-    padding: 14px 0;
-=======
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -620,20 +544,13 @@
     margin: 16px auto;
     text-align: left;    
     font-size: 14px;
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
   }
   .new-price {
     font-size: 22px;
   }
-<<<<<<< HEAD
-  
-  .buy-btn {
-    width: 100%;
-=======
   .btn-checkout {
     width: 100%;
     font-size: 16px;
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
   }
   .profile-layout {
     flex-direction: column;
@@ -712,8 +629,4 @@
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 16px !important;
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53

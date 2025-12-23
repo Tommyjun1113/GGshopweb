@@ -228,9 +228,9 @@ function goForgotStep2() {
 }
 </script>
 <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    /* ================= Firebase 初始化 ================= */
-   if (!firebase.apps.length) {
+document.addEventListener("DOMContentLoaded", async () => {
+  // 0) Firebase init
+  if (!firebase.apps.length) {
     firebase.initializeApp({
       apiKey: "AIzaSyDQIC_jH4wQguSTnvmy2gdl3TyJcO-lXME",
       authDomain: "shopping-54704.firebaseapp.com",
@@ -239,46 +239,54 @@ function goForgotStep2() {
   }
 
   const auth = firebase.auth();
+  let loginHandled = false; // ✅ 防止重複送後端
 
-  // 2️⃣ 🔔 唯一正確入口：等 Firebase 告訴你登入完成
-  try {
-    const result = await auth.getRedirectResult();
+  async function sendTokenToBackend(user) {
+    if (!user) return;
+    if (loginHandled) return;
+    loginHandled = true;
 
-    if (result.user) {
-      console.log("✅ Redirect Firebase 登入成功:", result.user.email);
-
-      const token = await result.user.getIdToken();
+    try {
+      const token = await user.getIdToken(true); // 強制刷新，降低時間飄移問題
 
       const res = await fetch("/api/firebase-login/", {
         method: "POST",
         credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": document.querySelector(
-            'meta[name="csrf-token"]'
-          ).content,
+          "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content,
         },
         body: JSON.stringify({ token }),
       });
 
       const data = await res.json();
-      console.log("🔥 Django response:", data);
 
       if (data.success) {
         window.location.replace("/GGshopping/");
+      } else {
+        loginHandled = false;
+        showError("login-error", "登入失敗（後端）");
       }
+    } catch (err) {
+      console.error("❌ sendTokenToBackend error:", err);
+      loginHandled = false;
+      showError("login-error", "登入失敗，請稍後再試");
     }
-  } catch (err) {
-    console.error("❌ getRedirectResult error:", err);
   }
-    
-    /* ================= Email / 密碼登入 ================= */
-    document.getElementById("email-login-btn").onclick = async () => {
+
+  // ✅ 唯一入口：任何登入成功（Email/Google/Redirect回來）都會進這裡
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) return;
+    console.log("✅ Firebase 登入完成:", user.email);
+    await sendTokenToBackend(user);
+  });
+
+  // 1) Email/密碼登入：只做 Firebase 登入，不打後端（交給 onAuthStateChanged）
+  document.getElementById("email-login-btn").onclick = async () => {
     hideError("login-error");
 
     const emailInput = document.querySelector("input[name='account']");
     const passwordInput = document.querySelector("input[name='password']");
-    
     emailInput.classList.remove("input-error");
     passwordInput.classList.remove("input-error");
 
@@ -286,62 +294,40 @@ function goForgotStep2() {
     const password = passwordInput.value;
 
     if (!email || !password) {
-        showError("login-error", "請輸入帳號與密碼");
-        emailInput.classList.add("input-error");
-        passwordInput.classList.add("input-error");
-        return;
+      showError("login-error", "請輸入帳號與密碼");
+      emailInput.classList.add("input-error");
+      passwordInput.classList.add("input-error");
+      return;
     }
 
     try {
-        await auth.signInWithEmailAndPassword(email, password);
-          const user = firebase.auth().currentUser;
-          const token = await user.getIdToken();
-
-          const res = await fetch("/api/firebase-login/", {
-            method: "POST",
-            credentials: "same-origin",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": document.querySelector(
-                'meta[name="csrf-token"]'
-              ).content,
-            },
-            body: JSON.stringify({ token }),
-          });
-
-          const data = await res.json();
-
-          if (data.success) {
-            window.location.replace("/GGshopping/");
-          } else {
-            alert("登入失敗（後端）");
-          }
-      } catch (err) {
-        showError("login-error", firebaseErrorToMessage(err));
-        emailInput.classList.add("input-error");
-        passwordInput.classList.add("input-error");
+      await auth.signInWithEmailAndPassword(email, password);
+      // ✅ 成功後不做任何事，onAuthStateChanged 會自動處理
+    } catch (err) {
+      showError("login-error", firebaseErrorToMessage(err));
+      emailInput.classList.add("input-error");
+      passwordInput.classList.add("input-error");
     }
   };
 
-  /* ================= Google 登入 ================= */
-  document
-    .getElementById("google-login-btn")
-    .addEventListener("click", function () {
-      console.log("🔥 Google 按鈕點擊");
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
-      auth.signInWithRedirect(provider);
-    });
-  /* ================= LINE 登入 ================= */
-  const lineBtn = document.querySelector(".social-btn img[src*='line']")?.parentElement;
-    if (lineBtn) { 
-      lineBtn.addEventListener("click", () => {
-        window.location.href = "/api/auth/line/login/";
-      });
-    }
-});
+  // 2) Google 登入：redirect
+  document.getElementById("google-login-btn").addEventListener("click", () => {
+    console.log("🔥 Google 按鈕點擊");
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    auth.signInWithRedirect(provider);
+  });
 
+  // 3) LINE 登入
+  const lineBtn = document.querySelector(".social-btn.line");
+  if (lineBtn) {
+    lineBtn.addEventListener("click", () => {
+      window.location.href = "/api/auth/line/login/";
+    });
+  }
+});
 </script>
+
 
 <script>
 document.getElementById("register-btn").onclick = async () => {
@@ -473,9 +459,4 @@ document.getElementById("reset-password-btn").onclick = async () => {
 };
 </script>
 
-<<<<<<< HEAD
 {% endblock %}
-
-=======
-{% endblock %}
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53

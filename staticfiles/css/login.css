@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-/* ===== 登入頁整體 ===== */
-
-=======
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53
 .content {
   min-height: calc(100vh - 220px); 
   display: flex;
@@ -194,11 +189,4 @@
 
 .form-step.active {
     display: block;
-<<<<<<< HEAD
 }
-
-
-
-=======
-}
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53

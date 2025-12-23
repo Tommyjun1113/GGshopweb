@@ -175,8 +175,4 @@ async function updateCartBadge() {
   }
 }
 
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 23ed7dc3155447bd64d6dc0e7dcf7860ea3e3f53

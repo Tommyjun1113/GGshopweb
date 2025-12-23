@@ -8,9 +8,9 @@ from django.contrib.auth.models import User
 import json
 import random
 import requests
-
+import time
+from datetime import datetime
 from firebase_admin import auth as firebase_auth, firestore
-
 from .auth_utils import get_uid_from_request
 from .firebase_init import init_firebase
 from .firebase_init import get_db
@@ -58,6 +58,9 @@ def orders_page(request):
 def favorites_page(request):
     return render(request,"favorites.html")
 
+def order_success_page(request):
+    return render(request, "order_success.html")
+
 @csrf_exempt
 def firebase_login(request):
     init_firebase()
@@ -68,7 +71,7 @@ def firebase_login(request):
         body = json.loads(request.body)
         token = body.get("token")
 
-        decoded = firebase_auth.verify_id_token(token)
+        decoded = firebase_auth.verify_id_token(token,clock_skew_seconds=10)
         uid = decoded["uid"]
         email = decoded.get("email", f"{uid}@firebase.local")
 
@@ -79,10 +82,36 @@ def firebase_login(request):
             "provider": decoded.get("firebase", {}).get("sign_in_provider"),
             "lastLoginAt": firestore.SERVER_TIMESTAMP
         }, merge=True)
+        coupons_ref = db.collection("users").document(uid).collection("coupons")
 
-        # ❌ 不要 login(request, user)
+        # 檢查是否已經發過券（避免重複）
+        has_coupon = list(coupons_ref.limit(1).stream())
+
+        if not has_coupon:
+            now = firestore.SERVER_TIMESTAMP
+
+            # 🎟️ 優惠券 1：滿 3000 折 300
+            coupons_ref.document("SAVE300").set({
+                "title": "滿 3000 折 300",
+                "type": "AMOUNT",
+                "value": 300,
+                "minSpend": 3000,
+                "used": False,
+                "createdAt": now,
+                "expireDate": "2026/01/31"
+            })
+
+            # 🎟️ 優惠券 2：新會員 9 折
+            coupons_ref.document("WELCOME10").set({
+                "title": "新會員 9 折",
+                "type": "PERCENT",
+                "value": 10,          
+                "minSpend": 0,
+                "used": False,
+                "createdAt": now,
+                "expireDate": "2026/02/15"
+            })    
         return JsonResponse({"success": True})
-
     except Exception as e:
         print("❌ firebase_login error:", e)
         return JsonResponse({"success": False}, status=400)
@@ -313,7 +342,7 @@ def api_cart_add(request):
     else:
         cart_ref.add(item)
     return JsonResponse({"success": True})
-
+@csrf_exempt
 @require_http_methods(["PATCH"])
 def api_cart_update(request, cart_id):
     uid = get_uid_from_request(request)
@@ -363,29 +392,31 @@ def api_cart_delete_batch(request):
         cart_ref.document(cart_id).delete()
 
     return JsonResponse({"success": True})
+
 def api_best_coupon(request):
     uid = get_uid_from_request(request)
+    print("🎟️ api_best_coupon UID =", uid)
     if not uid:
         return JsonResponse({"error": "Unauthorized"}, status=401)
 
     db = get_db()
-    cart_docs = db.collection("users").document(uid).collection("cart").stream()
-    total = sum(d.to_dict()["price"] * d.to_dict()["quantity"] for d in cart_docs)
-
     coupons = db.collection("users").document(uid).collection("coupons") \
         .where("used", "==", False) \
         .stream()
 
-    best = None
+    coupon_list = []
     for doc in coupons:
+        print("🎫 found coupon:", doc.id)
         c = doc.to_dict()
-        if c["minSpend"] <= total:
-            if not best or c["value"] > best["value"]:
-                best = {**c, "id": doc.id}
+        coupon_list.append({
+            "id": doc.id,
+            "title": c["title"],
+            "value": c["value"],
+            "minSpend": c["minSpend"]
+        })
 
     return JsonResponse({
-        "cartTotal": total,
-        "bestCoupon": best
+        "coupons": coupon_list
     })
 
 @csrf_exempt
@@ -434,6 +465,9 @@ def api_orders(request):
         result.append(data)
     return JsonResponse(result, safe=False)
 
+
+
+@csrf_exempt
 @require_POST
 def api_order_submit(request):
     uid = get_uid_from_request(request)
@@ -441,47 +475,51 @@ def api_order_submit(request):
         return JsonResponse({"error": "Unauthorized"}, status=401)
 
     body = json.loads(request.body or "{}")
+    items = body.get("items", [])
+    if not items:
+        return JsonResponse({"error": "No items"}, status=400)
+
     coupon_id = body.get("couponId")
-    db = get_db()
-    cart_ref = db.collection("users").document(uid).collection("cart")
-    cart_docs = list(cart_ref.stream())
-
-    if not cart_docs:
-        return JsonResponse({"error": "Cart empty"}, status=400)
-
-    items = []
-    subtotal = 0
-
-    for doc in cart_docs:
-        item = doc.to_dict()
-        items.append(item)
-        subtotal += item["price"] * item["quantity"]
+    payment_method = body.get("paymentMethod")
+    shipping_info = body.get("shippingInfo")
 
    
+    order_items = []
+    subtotal = 0
+
+    for i in items:
+        price = int(i.get("price", 0))
+        quantity = int(i.get("quantity", 1))
+        subtotal += price * quantity
+
+        order_items.append({
+            "productId": str(i.get("productId")),
+            "productName": i.get("productName"),
+            "price": price,
+            "quantity": quantity,
+            "size": i.get("size"),
+            "imageKey": i.get("imageKey"),
+        })
+
+    db = get_db()
+
+    
     discount = 0
-    coupon_data = None
+    coupon_map = None
 
     if coupon_id:
-        coupon_ref = (
-            db.collection("users")
-            .document(uid)
-            .collection("coupons")
-            .document(coupon_id)
-        )
+        coupon_ref = db.collection("users").document(uid).collection("coupons").document(coupon_id)
         coupon_doc = coupon_ref.get()
 
         if coupon_doc.exists:
-            coupon = coupon_doc.to_dict()
+            c = coupon_doc.to_dict()
+            if not c.get("used", False) and int(c.get("minSpend", 0)) <= subtotal:
+                discount = int(c.get("value", 0))
 
-            if (
-                not coupon.get("used", False)
-                and coupon["minSpend"] <= subtotal
-            ):
-                discount = coupon["value"]
-                coupon_data = {
-                    "couponId": coupon_id,
-                    "couponTitle": coupon["title"],
-                    "discount": discount
+                coupon_map = {
+                    "id": coupon_id,
+                    "title": c.get("title"),
+                    "value": int(c.get("value", 0)),
                 }
 
                 coupon_ref.update({
@@ -491,23 +529,36 @@ def api_order_submit(request):
 
     total = max(subtotal - discount, 0)
 
-  
-    db.collection("orders").add({
-        "uid": uid,
-        "items": items,
-        "subtotal": subtotal,
+   
+    order_data = {
+        "items": order_items,
+        "coupon": coupon_map,
         "discount": discount,
+        "paymentMethod": payment_method,
+        "shippingInfo": shipping_info,
+        "status": "PENDING",
         "total": total,
-        "coupon": coupon_data,
-        "paymentMethod": "WEB",
-        "createdAt": firestore.SERVER_TIMESTAMP
-    })
+        "createdAt": int(time.time() * 1000),
+    }
 
-    
-    for doc in cart_docs:
-        doc.reference.delete()
+    db.collection("users").document(uid).collection("orders").add(order_data)
+
+   
+    cart_ref = db.collection("users").document(uid).collection("cart")
+    for item in order_items:
+        query = (
+            cart_ref
+            .where("productId", "==", item["productId"])
+            .where("size", "==", item.get("size"))
+            .stream()
+        )
+        for doc in query:
+            doc.reference.delete()
 
     return JsonResponse({"success": True})
+
+
+
 
 def api_favorites(request):
     return JsonResponse({"success": True})

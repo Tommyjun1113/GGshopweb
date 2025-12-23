@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     loginHandled = true;
 
     try {
-      const token = await user.getIdToken(true); // 強制刷新，降低時間飄移問題
+      const token = await user.getIdToken(true); 
 
       const res = await fetch("/api/firebase-login/", {
         method: "POST",

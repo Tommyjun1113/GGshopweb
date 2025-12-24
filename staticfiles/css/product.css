@@ -216,3 +216,22 @@ body {
 .hidden {
     display: none;
 }
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.favorite-icon {
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.favorite-icon:hover {
+  transform: scale(1.1);
+}
+
+

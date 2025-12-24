@@ -17,7 +17,8 @@
 .sidebar-profile-menu .menu-title {
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-left: 10px !important;
+  margin-bottom: 0;
 }
 
 .sidebar-profile-menu .submenu {
@@ -27,7 +28,8 @@
 }
 
 .sidebar-profile-menu .submenu li {
-  margin-bottom: 12px;
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 .sidebar-profile-menu .submenu a {
@@ -52,9 +54,14 @@
   background: #fff;
   border-radius: 16px;
   padding: 32px;
+  max-width: 640px;      
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
-
+.profile-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
 .profile-card h2 {
   margin-bottom: 24px;
 }
@@ -119,13 +126,15 @@
   border-top: none;
 }
 
-
-@media (max-width: 1024px) {
-  .sidebar-profile-menu {
-    width: 180px;
-  }
-
-  .profile-card {
-    padding: 28px;
-  }
+.btn-danger {
+  margin-top: 24px;
+  background: #c62828;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn-danger:hover {
+  background: #b71c1c;
 }

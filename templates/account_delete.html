@@ -1,0 +1,30 @@
+{% extends "GGshopping.html" %}
+{% load static %}
+{% block title %}
+  <title>刪除帳戶確認</title>
+{% endblock title %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/account-delete.css' %}">
+{% endblock head %}
+{% block content %}
+<div class="delete-account-wrapper">
+
+<h1>刪除帳戶確認</h1>
+
+<p>⚠️ 此操作無法復原，請確認你了解以下事項：</p>
+
+<label><input type="checkbox" class="confirm-check"> 我了解帳戶資料將永久刪除</label>
+<label><input type="checkbox" class="confirm-check"> 我了解訂單 / 最愛 / 個人資料都會消失</label>
+<label><input type="checkbox" class="confirm-check"> 我了解此動作無法復原</label>
+<label><input type="checkbox" class="confirm-check"> 我仍然要刪除帳戶</label>
+
+<button id="confirmDeleteBtn" disabled class="btn-danger">
+  確認刪除帳戶
+</button>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{static 'js/account-delete.js' %}"></script>
+{% endblock %}

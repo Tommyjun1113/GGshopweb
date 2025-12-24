@@ -112,7 +112,7 @@
 
             <input class="login-input" id="forgotAccount" placeholder="請輸入 Email 或手機">
 
-            <button class="login-btn" id="forgot-btn" type="button" onclick="goForgotStep2()">
+            <button class="login-btn" id="forgot-btn" type="button">
                 發送驗證碼
             </button>
 
@@ -144,6 +144,36 @@
 {% endblock content %}
 {% block extra_js %}
 <meta name="csrf-token" content="{{ csrf_token }}">
+<script src="{% static 'js/auth-utils.js' %}"></script>
+<script src="{% static 'js/login.js' %}"></script>
+<script src="{% static 'js/register.js' %}"></script>
+<script src="{% static 'js/forgot.js' %}"></script>
+
+<!-- 🔥🔥🔥 加在這裡 🔥🔥🔥 -->
+<script>
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (!user) return;
+
+  const token = await user.getIdToken();
+
+  const res = await fetch("/api/firebase-login/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": document.querySelector(
+        'meta[name="csrf-token"]'
+      ).content,
+    },
+    body: JSON.stringify({ token }),
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    window.location.replace("/GGshopping/");
+  }
+});
+</script>
 
 <script>
 function showError(id, message) {
@@ -196,8 +226,6 @@ function hideAllBoxes() {
     el.classList.remove("active");
   });
 }
-
-
 function switchToLogin() {
   hideAllBoxes();
   document.getElementById("loginBox").classList.add("active");
@@ -221,227 +249,5 @@ function goToForgotStep1() {
   document.getElementById("forgotBox").classList.add("active");
   document.getElementById("forgotStep1").classList.add("active");
 }
-
-function goForgotStep2() {
-  document.getElementById("forgotStep1").classList.remove("active");
-  document.getElementById("forgotStep2").classList.add("active");
-}
 </script>
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
-  const auth = window.auth;
-  let sent = false;
-
-  async function sendTokenToBackend(user) {
-    if (!user || sent) return;
-    sent = true;
-
-    const token = await user.getIdToken();
-
-    const res = await fetch("/api/firebase-login/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": document.querySelector(
-          'meta[name="csrf-token"]'
-        ).content,
-      },
-      body: JSON.stringify({ token }),
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      window.location.replace("/GGshopping/");
-    }else {
-      console.error("backend login failed", data);
-    }
-  }
-  try {
-    const result = await auth.getRedirectResult();
-    if (result && result.user) {
-      await sendTokenToBackend(result.user);
-    }
-  } catch (err) {
-    console.error("redirect error", err);
-    alert(err.message);
-  }
-  // 1) Email/密碼登入：只做 Firebase 登入，不打後端（交給 onAuthStateChanged）
-  document.getElementById("email-login-btn").onclick = async () => {
-    hideError("login-error");
-
-    const emailInput = document.querySelector("input[name='account']");
-    const passwordInput = document.querySelector("input[name='password']");
-    emailInput.classList.remove("input-error");
-    passwordInput.classList.remove("input-error");
-
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-
-    if (!email || !password) {
-      showError("login-error", "請輸入帳號與密碼");
-      emailInput.classList.add("input-error");
-      passwordInput.classList.add("input-error");
-      return;
-    }
-
-    try {
-      await auth.signInWithEmailAndPassword(email, password);
-      window.location.replace("/GGshopping/");
-      // ✅ 成功後不做任何事，onAuthStateChanged 會自動處理
-    } catch (err) {
-      showError("login-error", firebaseErrorToMessage(err));
-      emailInput.classList.add("input-error");
-      passwordInput.classList.add("input-error");
-    }
-  };
-  // 3) LINE 登入
-  const lineBtn = document.querySelector(".social-btn.line");
-  if (lineBtn) {
-    lineBtn.addEventListener("click", () => {
-      window.location.href = "/api/auth/line/login/";
-    });
-  }
-});
-</script>
-<script>
-document.getElementById("google-login-btn").addEventListener("click", () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
-
-  // ✅ 用 redirect（不是 popup）
-  firebase.auth().signInWithRedirect(provider);
-});
-</script>
-
-
-<script>
-document.getElementById("register-btn").onclick = async () => {
-  const email = document.getElementById("regEmail").value.trim();
-  const phone = document.getElementById("regPhone").value.trim();
-  const password = document.querySelector("#registerStep2 input[name='password']").value;
-  const password2 = document.querySelector("#registerStep2 input[name='password2']").value;
-
-  if (!email || !phone || !password || !password2) {
-    alert("請填寫完整資料");
-    return;
-  }
-
-  if (password !== password2) {
-    alert("密碼不一致");
-    return;
-  }
-
-  try {
-   
-    const cred = await firebase.auth()
-      .createUserWithEmailAndPassword(email, password);
-
-    const user = cred.user;
-
-   
-    await firebase.firestore()
-      .collection("users")
-      .doc(user.uid)
-      .set({
-        uid: user.uid,
-        email: email,
-        name: "",
-        phone: phone,
-        address: "",
-        birthday: "",
-        gender: "",
-        provider: "password",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-    
-    window.location.href = "/GGshopping/";
-
-  } catch (e) {
-    alert("註冊失敗：" + e.message);
-  }
-};
-</script>
-
-
-<script>
-
-document.getElementById("forgot-btn").onclick = async () => {
-  const email = document.getElementById("forgotAccount").value.trim();
-  if (!email) {
-    alert("請輸入 Email");
-    return;
-  }
-
-  const res = await fetch("/api/forgot/send-code/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email })
-  });
-
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById("forgotStep1").classList.remove("active");
-    document.getElementById("forgotStep2").classList.add("active");
-  } else {
-    alert(data.message || "Email 不存在");
-  }
-};
-
-
-document.getElementById("forgot-confirm-btn").onclick = async () => {
-  const email = document.getElementById("forgotAccount").value.trim();
-  const code = document.getElementById("forgotCode").value.trim();
-
-  if (!code) {
-    alert("請輸入驗證碼");
-    return;
-  }
-
-  const res = await fetch("/api/forgot/verify-code/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, code })
-  });
-
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById("forgotStep2").classList.remove("active");
-    document.getElementById("resetPasswordBox").classList.add("active");
-  } else {
-    alert("驗證碼錯誤");
-  }
-};
-
-
-document.getElementById("reset-password-btn").onclick = async () => {
-  const email = document.getElementById("forgotAccount").value.trim();
-  const p1 = document.getElementById("newPwd").value.trim();
-  const p2 = document.getElementById("newPwd2").value.trim();
-
-  if (!p1 || !p2) {
-    alert("請輸入密碼");
-    return;
-  }
-  if (p1 !== p2) {
-    alert("密碼不一致");
-    return;
-  }
-
-  const res = await fetch("/api/forgot/reset-password/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password: p1 })
-  });
-
-  const data = await res.json();
-  if (data.success) {
-    alert("密碼重設成功，請重新登入");
-    switchToLogin();
-  } else {
-    alert("重設失敗");
-  }
-};
-</script>
-
 {% endblock %}

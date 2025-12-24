@@ -1,0 +1,34 @@
+{% extends "GGshopping.html" %}
+{% load static %}
+{% block title %}
+<title>我的最愛</title>
+{% endblock title %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/favorites.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-layout">
+
+  <aside class="sidebar-profile-menu">
+    <div class="menu-title">我的最愛</div>
+    <ul class="submenu">
+      <li><a href="/profile/">我的帳戶</a></li>
+      <li><a href="/orders/">購買紀錄</a></li>
+      <li><a href="/favorites/" class="active">我的最愛</a></li>
+    </ul>
+  </aside>
+
+    <div class="container mt-4">
+      <h2>我的最愛</h2>
+      <div id="favoritesList" class="favorites-grid"></div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/products-data.js' %}"></script>
+<script src="{% static 'js/favorites.js' %}"></script>
+{% endblock %}

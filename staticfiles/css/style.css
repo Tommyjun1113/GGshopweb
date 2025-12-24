@@ -225,6 +225,7 @@
   .shop-content h2{
     margin-top: 0;
   }
+  
 }
 
 
@@ -337,7 +338,7 @@
 
   .menu-title {
     text-align: center !important;
-    margin-right: 40px;
+    margin-right: 0 !important;
     margin-bottom: 14px !important;
   }
 
@@ -639,39 +640,62 @@
     font-size: 16px;
   }
   .profile-layout {
+    max-width: 520px;     /* ⭐ 跟卡片視覺對齊 */
+    margin-left: auto;
+    margin-right: auto;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
     margin: 20px auto;
   }
-
-  
-  .sidebar-profile-menu {
-    width: 100%;
+  .sidebar-profile-menu .menu-title{
+    width: 100% !important;
+    text-align: center !important;
   }
-
-  .sidebar-profile-menu .submenu {
+  .sidebar-profile-menu {
+    width: 100% !important;
+    max-width: 100% !important;
     display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center; 
+    margin-bottom: 8px;
+  }
+  .sidebar-profile-menu .submenu {
+    display: flex !important;
+    flex-direction: row; 
+    justify-content: center ;
+    gap: 20px;
+    align-items: center ;
+    margin-bottom: 12px;
   }
 
   .sidebar-profile-menu .submenu li {
-    margin-bottom: 0;
-    flex: 1;
-    min-width: 120px;
+    width: auto;
   }
 
   .sidebar-profile-menu .submenu a {
-    border-radius: 999px;
-    padding: 10px 0;
-    font-size: 14px;
+    background: transparent;
+    color: #666;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 6px 4px;
+    border-radius: 0;
   }
 
   
   .profile-card {
     padding: 24px 20px;
   }
+  .fav-card img {
+    height: 180px;
+  }
 
+  .fav-card h4 {
+    font-size: 14px;
+  }
+
+  .fav-card p {
+    font-size: 13px;
+  }
 }
 
 

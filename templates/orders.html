@@ -1,6 +1,8 @@
 {% extends "GGshopping.html" %}
 {% load static %}
-
+{% block title %}
+  <title>購買紀錄</title>
+{% endblock title %}
 {% block head %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
@@ -8,9 +10,8 @@
 {% block content %}
 <div class="profile-layout">
 
-  
   <aside class="sidebar-profile-menu">
-    <div class="menu-title">我的帳戶</div>
+    <div class="menu-title">購買紀錄</div>
     <ul class="submenu">
       <li><a href="/profile/">我的帳戶</a></li>
       <li><a href="/orders/" class="active">購買紀錄</a></li>
@@ -18,7 +19,6 @@
     </ul>
   </aside>
 
- 
   <section class="profile-card">
     <h2>購買紀錄</h2>
     <div id="orders-container"></div>

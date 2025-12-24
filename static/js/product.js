@@ -174,5 +174,78 @@ async function updateCartBadge() {
     console.error(err);
   }
 }
+// =============================
+// 收藏（Favorites）
+// =============================
+const favoriteBtn = document.getElementById("favoriteBtn");
 
+if (favoriteBtn) {
+  const productId = product.sku;
+
+  const OUTLINE = "/static/icons/heart.png";
+  const FILLED  = "/static/icons/img_9.png";
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      favoriteBtn.src = OUTLINE;
+      favoriteBtn.dataset.fav = "0";
+      return;
+    }
+
+    const uid = user.uid;
+    const favRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(uid)
+      .collection("favorites")
+      .doc(productId);
+
+    const snap = await favRef.get();
+    if (snap.exists) {
+      favoriteBtn.src = FILLED;
+      favoriteBtn.dataset.fav = "1";
+    } else {
+      favoriteBtn.src = OUTLINE;
+      favoriteBtn.dataset.fav = "0";
+    }
+  });
+    // 點擊收藏
+     favoriteBtn.addEventListener("click", async () => {
+    const user = auth.currentUser;
+
+    // ❗沒登入 → 直接跳登入頁
+    if (!user) {
+      const goLogin = confirm("請先登入才能加入收藏，是否前往登入？");
+      if (goLogin) {
+      window.location.href = "/login/";
+      }
+      return;
+    }
+
+    const uid = user.uid;
+    const favRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(uid)
+      .collection("favorites")
+      .doc(productId);
+
+    const isFav = favoriteBtn.dataset.fav === "1";
+
+    if (isFav) {
+      // 取消收藏
+      await favRef.delete();
+      favoriteBtn.src = OUTLINE;
+      favoriteBtn.dataset.fav = "0";
+    } else {
+      // 加入收藏（和 APP 共用）
+      await favRef.set({
+        productId: productId,
+        createdAt: Date.now()
+      });
+      favoriteBtn.src = FILLED;
+      favoriteBtn.dataset.fav = "1";
+    }
+  });
+}
 });

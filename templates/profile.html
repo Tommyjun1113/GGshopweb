@@ -1,7 +1,9 @@
 {% extends "GGshopping.html" %}
 {% load static %}
+{% block title %}
+  <title>我的帳戶</title>
+{% endblock title %}
 {% block head %}
-<link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock head %}
 {% block content %}
@@ -18,45 +20,52 @@
   </aside>
 
   <!-- 會員資料 -->
-  <section class="profile-card">
-    <h2>會員資料</h2>
+  <div class="profile-main">
+    <section class="profile-card">
+      <h2>會員資料</h2>
 
-    <label>
-        *使用者名稱
-        <input id="name" type="text">
-    </label>
+      <label>
+          *使用者名稱
+          <input id="name" type="text">
+      </label>
 
-     <label>
-        *電子郵件
-        <input id="email" type="email" disabled>
-    </label>
+      <label>
+          *電子郵件
+          <input id="email" type="email" disabled>
+      </label>
 
-    <label>
-        手機號碼
-        <input id="phone" type="text" >
-    </label>
-    <label >
-        生日
-        <input id="birthday" type="date" >
-    </label>
-    <label >
-        性別
-        <select id="gender">
-            <option value="">請選擇</option>
-            <option value="男">男</option>
-            <option value="女">女</option>
-            <option value="其他">其他</option>
-        </select>
-    </label>
-    <label>
-        地址
-        <input id="address" type="text" >
-    </label>
-   
+      <label>
+          手機號碼
+          <input id="phone" type="text" >
+      </label>
+      <label >
+          生日
+          <input id="birthday" type="date" >
+      </label>
+      <label >
+          性別
+          <select id="gender">
+              <option value="">請選擇</option>
+              <option value="男">男</option>
+              <option value="女">女</option>
+              <option value="其他">其他</option>
+          </select>
+      </label>
+      <label>
+          地址
+          <input id="address" type="text" >
+      </label>
+    
 
-    <button id="saveProfile">儲存修改</button>
-  </section>
+      <button id="saveProfile">儲存修改</button>
 
+      <hr>
+
+      <button id="deleteAccountBtn" class="btn-danger">
+        刪除帳戶
+      </button>
+    </section>
+  </div>
 </div>
 {% endblock %}
 
@@ -86,6 +95,9 @@ auth.onAuthStateChanged(async user => {
   document.getElementById("birthday").value = data.birthday || "";
   document.getElementById("gender").value = data.gender || "";
   document.getElementById("address").value = data.address || "";
+  document.getElementById("deleteAccountBtn").onclick = () => {
+    location.href = "{% url 'delete_account_page' %}";
+  };
 });
 
 /* ===============================

@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from myapp import views
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('final-homework/',views.final-homework),
@@ -38,7 +39,8 @@ urlpatterns = [
     path("profile/", views.profile_page, name="profile"),
     path("api/profile/", views.api_profile),
     path("api/profile_update/", views.api_profile_update),
-
+    path("api/account/delete/",views.api_delete_account),
+    path("account/delete/", views.delete_account_page, name="delete_account_page"),
     path("api/forgot/send-code/",views.api_forgot_send_code),
     path("api/forgot/verify-code/",views.api_forgot_verify_code),
     path("api/forgot/reset-password/",views.api_forgot_reset_password),

@@ -1,0 +1,75 @@
+/* 整體版面 */
+.delete-account-wrapper {
+  max-width: 680px;
+  margin: 70px auto;
+  padding: 36px 40px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+}
+
+/* 標題 */
+.delete-account-wrapper h1 {
+  color: #c62828;
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+/* 警告說明 */
+.delete-account-wrapper p {
+  background: #fff3e0;
+  border-left: 5px solid #ff9800;
+  padding: 14px 18px;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 26px;
+}
+
+/* checkbox 區 */
+.delete-account-wrapper label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #333;
+  margin: 10px 0;
+}
+
+/* checkbox 放大 */
+.delete-account-wrapper input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+/* 最後一條警告（第四條） */
+.delete-account-wrapper label:last-of-type {
+  color: #c62828;
+  font-weight: 600;
+}
+
+/* 刪除按鈕（預設不可按） */
+.btn-danger {
+  width: 100%;
+  margin-top: 30px;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #e0e0e0;
+  color: #888;
+  cursor: not-allowed;
+  transition: all 0.25s ease;
+}
+
+/* 所有 checkbox 勾選後 */
+.btn-danger:not(:disabled) {
+  background: #c62828;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* hover */
+.btn-danger:not(:disabled):hover {
+  background: #b71c1c;
+}

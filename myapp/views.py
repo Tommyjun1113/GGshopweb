@@ -14,7 +14,9 @@ from firebase_admin import auth as firebase_auth, firestore
 from .auth_utils import get_uid_from_request
 from .firebase_init import init_firebase
 from .firebase_init import get_db
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 def GGshopping(request):
     return render(request, "GGshopping.html")
@@ -45,6 +47,9 @@ def login_page(request):
 
 def profile_page(request):
     return render(request, "profile.html")
+
+def delete_account_page(request):
+    return render(request, "account_delete.html")
 
 def cart_page(request):
     return render(request,"cart.html")
@@ -221,6 +226,47 @@ def api_profile_update(request):
     db.collection("users").document(uid).set(body, merge=True)
     return JsonResponse({"success": True})
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def api_delete_account(request):
+    user = request.user
+
+    
+    uid = get_uid_from_request(request)
+    if not uid:
+        return Response({"success": False, "error": "No UID"}, status=401)
+
+    db = get_db()
+
+    try:
+        
+        user_ref = db.collection("users").document(uid)
+
+        
+        for col in ["cart", "orders", "coupons"]:
+            docs = user_ref.collection(col).stream()
+            for doc in docs:
+                doc.reference.delete()
+
+        
+        user_ref.delete()
+
+        
+        firebase_auth.delete_user(uid)
+
+        
+        user.delete()
+
+        return Response({"success": True})
+
+    except Exception as e:
+        print("❌ delete_account error:", e)
+        return Response(
+            {"success": False, "error": str(e)},
+            status=500
+        )
+
+
 @csrf_exempt
 def api_forgot_send_code(request):
     if request.method != "POST":
@@ -363,6 +409,7 @@ def api_cart_add(request):
     else:
         cart_ref.add(item)
     return JsonResponse({"success": True})
+
 @csrf_exempt
 @require_http_methods(["PATCH"])
 def api_cart_update(request, cart_id):
@@ -578,8 +625,28 @@ def api_order_submit(request):
 
     return JsonResponse({"success": True})
 
-
-
-
+@csrf_exempt
 def api_favorites(request):
-    return JsonResponse({"success": True})
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    db = get_db()
+    docs = (
+        db.collection("users")
+        .document(uid)
+        .collection("favorites")
+        .order_by("createdAt", direction=firestore.Query.DESCENDING)
+        .stream()
+    )
+
+    result = []
+    for doc in docs:
+        data = doc.to_dict()
+        result.append({
+            "id": doc.id,                 # productId
+            "productId": data.get("productId"),
+            "createdAt": data.get("createdAt"),
+        })
+
+    return JsonResponse(result, safe=False)

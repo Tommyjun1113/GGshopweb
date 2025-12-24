@@ -8,7 +8,7 @@ window.productsData = [
       id: "shoes",
       sku: "1",
       title: "NIKE 球鞋（黑色）",
-      price: 1990,
+      price: 2590,
       images: [
         "/static/products/nblack1.png",
         "/static/products/nblack2.png"
@@ -32,7 +32,7 @@ window.productsData = [
       id: "shoes",
       sku: "2",
       title: "NIKE 球鞋（棕色）",
-      price: 1990,
+      price: 2890,
       images: [
         "/static/products/nbrown1.png",
         "/static/products/nbrown2.png"
@@ -56,7 +56,7 @@ window.productsData = [
       id: "shoes",
       sku: "3",
       title: "NIKE 球鞋（GD款）",
-      price: 1990,
+      price: 3800,
       images: [
         "/static/products/ngd1.png",
         "/static/products/ngd2.png"
@@ -80,7 +80,7 @@ window.productsData = [
       id: "shoes",
       sku: "4",
       title: "NIKE 球鞋（灰色）",
-      price: 1990,
+      price: 2590,
       images: [
         "/static/products/ngray1.png",
         "/static/products/ngray2.png"
@@ -104,7 +104,7 @@ window.productsData = [
       id: "shoes",
       sku: "5",
       title: "NIKE 球鞋（紅色）",
-      price: 1990,
+      price: 2690,
       images: [
         "/static/products/nred1.png",
         "/static/products/nred2.png"
@@ -128,7 +128,7 @@ window.productsData = [
       id: "shoes",
       sku: "6",
       title: "NIKE 球鞋（特別款）",
-      price: 1990,
+      price: 4190,
       images: [
         "/static/products/nspecial1.png",
         "/static/products/nspecial2.png"
@@ -157,7 +157,7 @@ window.productsData = [
       id: "shoes",
       sku: "7",
       title: "PUMA 球鞋（黑色）",
-      price: 1990,
+      price: 2890,
       images: [
         "/static/products/pblack1.png",
         "/static/products/pblack2.png"
@@ -181,7 +181,7 @@ window.productsData = [
       id: "shoes",
       sku: "9",
       title: "PUMA 球鞋（藍色）",
-      price: 1990,
+      price: 2990,
       images: [
         "/static/products/pblue1.png",
         "/static/products/pblue2.png"
@@ -205,7 +205,7 @@ window.productsData = [
       id: "shoes",
       sku: "8",
       title: "PUMA 球鞋（棕色）",
-      price: 1990,
+      price: 2890,
       images: [
         "/static/products/pbrown1.png",
         "/static/products/pbrown2.png"
@@ -229,7 +229,7 @@ window.productsData = [
       id: "shoes",
       sku: "10",
       title: "PUMA 球鞋（灰色）",
-      price: 1990,
+      price: 2890,
       images: [
         "/static/products/pgray1.png",
         "/static/products/pgray2.png"
@@ -253,7 +253,7 @@ window.productsData = [
       id: "shoes",
       sku: "12",
       title: "PUMA 球鞋（粉色）",
-      price: 1990,
+      price: 2990,
       images: [
         "/static/products/ppink1.png", 
         "/static/products/ppink2.png"
@@ -277,7 +277,7 @@ window.productsData = [
       id: "shoes",
       sku: "11",
       title: "PUMA 球鞋（紅色）",
-      price: 1990,
+      price: 2990,
       images: [
         "/static/products/pred1.png",
         "/static/products/pred2.png"
@@ -306,7 +306,7 @@ window.productsData = [
       id: "shoes",
       sku: "13",
       title: "ADIDAS 球鞋（黑色）",
-      price: 1990,
+      price: 2590,
       images: [
         "/static/products/black1.png",
         "/static/products/black2.png"
@@ -330,7 +330,7 @@ window.productsData = [
       id: "shoes",
       sku: "15",
       title: "ADIDAS 球鞋（藍色）",
-      price: 1990,
+      price: 2890,
       images: [
         "/static/products/blue1.png",
         "/static/products/blue2.png"
@@ -354,7 +354,7 @@ window.productsData = [
       id: "shoes",
       sku: "16",
       title: "ADIDAS 球鞋（灰色）",
-      price: 1990,
+      price: 2590,
       images: [
         "/static/products/gray1.png",
         "/static/products/gray2.png"
@@ -378,7 +378,7 @@ window.productsData = [
       id: "shoes",
       sku: "14",
       title: "ADIDAS 球鞋（綠色）",
-      price: 1990,
+      price: 2890,
       images: [
         "/static/products/green1.png",
         "/static/products/green2.png"
@@ -402,7 +402,7 @@ window.productsData = [
       id: "shoes",
       sku: "18",
       title: "ADIDAS 球鞋（粉色）",
-      price: 1990,
+      price: 2890,
       images: [
         "/static/products/pink1.png",
         "/static/products/pink2.png"
@@ -426,7 +426,7 @@ window.productsData = [
       id: "shoes",
       sku: "17",
       title: "ADIDAS 球鞋（紅色）",
-      price: 1990,
+      price: 2790,
       images: [
         "/static/products/red1.png",
         "/static/products/red2.png"

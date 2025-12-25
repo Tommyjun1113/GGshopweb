@@ -604,7 +604,7 @@ def api_order_submit(request):
         "discount": discount,
         "paymentMethod": payment_method,
         "shippingInfo": shipping_info,
-        "status": "待付款 / 處理中",
+        "status": "PENDING",
         "total": total,
         "createdAt": int(time.time() * 1000),
     }
@@ -655,11 +655,11 @@ def api_order_return(request, order_id):
     order = doc.to_dict()
 
     
-    if order.get("status") not in ["已完成", "待付款 / 處理中"]:
+    if order.get("status") not in ["COMPLETED", "PENDING"]:
         return JsonResponse({"error": "Order not returnable"}, status=400)
 
     order_ref.update({
-        "status": "退貨申請中",
+        "status": "RETURN_REQUESTED",
         "return": {
             "reason": reason,
             "note": note,

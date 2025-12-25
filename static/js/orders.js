@@ -1,15 +1,15 @@
 
 let currentReturnOrderId = null;
-const canReturnStatus = ["已完成", "待付款 / 處理中"];
+const canReturnStatus = ["COMPLETED", "PENDING"];
 
-const statusClassMap = {
-  "PENDING": "pending",
-  "待付款 / 處理中": "pending",
-  "PAID": "paid",
-  "已完成": "paid",
-  "退貨申請中": "pending",
-  "已取消": "cancelled"
-};
+ORDER_STATUS_LABEL = {
+  "PENDING": "待付款 / 處理中",
+  "COMPLETED": "已完成",
+  "RETURN_REQUESTED": "退貨申請中",
+  "RETURN_APPROVED": "退貨審核通過",
+  "RETURN_REJECTED": "退貨被拒",
+  "CANCELLED": "已取消",
+}
 
 function waitForAuth() {
   return new Promise(resolve => {
@@ -97,10 +97,10 @@ function renderOrders(orders) {
     }
 
     let returnInfoHtml = "";
-    if (order.status === "退貨申請中" && order.return) {
+    if (order.status === "RETURN_REQUESTED" && order.return) {
       returnInfoHtml = `
         <div class="return-info">
-          <strong>退貨申請中</strong><br>
+          <strong>${ORDER_STATUS_LABEL[order.status]}</strong><br>
           原因：${order.return.reason}<br>
           ${order.return.note ? `說明：${order.return.note}` : ""}
         </div>
@@ -124,7 +124,7 @@ function renderOrders(orders) {
           <div>訂單日期：${date}</div>
           <div>付款方式：${order.paymentMethod || "—"}</div>
           <div class="status ${getStatusClass(order.status)}">
-            ${order.status}
+            ${ORDER_STATUS_LABEL[order.status] || order.status}
           </div>
         </div>
 
@@ -176,11 +176,19 @@ async function submitReturn() {
 }
 
 function getStatusClass(status) {
-  if (!status) return "";
-  if (status.includes("退貨")) return "returning";
-  if (status.includes("待付款")) return "pending";
-  if (status.includes("完成")) return "paid";
-  if (status.includes("取消")) return "cancelled";
-  return "";
+  switch (status) {
+    case "PENDING":
+      return "pending";
+    case "COMPLETED":
+      return "paid";
+    case "RETURN_REQUESTED":
+    case "RETURN_APPROVED":
+      return "returning";
+    case "RETURN_REJECTED":
+    case "CANCELLED":
+      return "cancelled";
+    default:
+      return "";
+  }
 }
 

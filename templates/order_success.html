@@ -1,6 +1,30 @@
+{% extends "GGshopping.html" %}
+{% load static %}
+
 {% block title %}
-  <title>完成訂單</title>
+<title>完成訂單｜GG SHOP</title>
 {% endblock title %}
-<h1>🎉 訂單完成</h1>
-<p>感謝您的購買！</p>
-<a href="/shop/">回到商店</a>
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/order_success.css' %}">
+{% endblock head %}
+
+{% block content %}
+<div class="order-success-wrap">
+
+  <div class="order-success-card">
+    <div class="success-icon">✓</div>
+
+    <h1>訂單完成</h1>
+    <p class="success-desc">
+      感謝您的購買！<br>
+      您的訂單已成功成立，我們將盡快為您處理。
+    </p>
+
+    <div class="success-actions">
+      <a href="/orders/" class="btn-outline">查看購買紀錄</a>
+      <a href="/shop/" class="btn-primary">繼續購物</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

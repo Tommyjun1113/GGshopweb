@@ -59,6 +59,8 @@ urlpatterns = [
     path("api/orders/", views.api_orders),
     path("api/order/submit/", views.api_order_submit),
     path("order_success/", views.order_success_page, name="order_success"),
+    path("api/orders/<str:order_id>/return/", views.api_order_return),
+
     path("favorites/", views.favorites_page, name="favorites"),
     path("api/favorites/", views.api_favorites),
 

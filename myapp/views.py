@@ -146,7 +146,7 @@ def firebase_login(request):
 
 LINE_CHANNEL_ID = 2008634753
 LINE_CHANNEL_SECRET = "d417d86ac49cc7f482035a82ccc4a18d"
-LINE_REDIRECT_URI = "http://192.168.59.19:8080/api/auth/line/callback/" # https://ggshopweb.onrender.com/api/auth/line/callback/
+LINE_REDIRECT_URI = "https://ggshopweb.onrender.com/api/auth/line/callback/" # http://192.168.59.19:8080/api/auth/line/callback/
 
 def line_login(request):
     url = (
@@ -604,7 +604,7 @@ def api_order_submit(request):
         "discount": discount,
         "paymentMethod": payment_method,
         "shippingInfo": shipping_info,
-        "status": "PENDING",
+        "status": "待付款 / 處理中",
         "total": total,
         "createdAt": int(time.time() * 1000),
     }
@@ -624,6 +624,51 @@ def api_order_submit(request):
             doc.reference.delete()
 
     return JsonResponse({"success": True})
+
+@csrf_exempt
+@require_POST
+def api_order_return(request, order_id):
+    uid = get_uid_from_request(request)
+    if not uid:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    body = json.loads(request.body or "{}")
+    reason = body.get("reason")
+    note = body.get("note", "")
+
+    if not reason:
+        return JsonResponse({"error": "Missing reason"}, status=400)
+
+    db = get_db()
+
+    order_ref = (
+        db.collection("users")
+        .document(uid)
+        .collection("orders")
+        .document(order_id)
+    )
+    doc = order_ref.get()
+
+    if not doc.exists:
+        return JsonResponse({"error": "Order not found"}, status=404)
+
+    order = doc.to_dict()
+
+    
+    if order.get("status") not in ["已完成", "待付款 / 處理中"]:
+        return JsonResponse({"error": "Order not returnable"}, status=400)
+
+    order_ref.update({
+        "status": "退貨申請中",
+        "return": {
+            "reason": reason,
+            "note": note,
+            "createdAt": int(time.time() * 1000)
+        }
+    })
+
+    return JsonResponse({"success": True})
+
 
 @csrf_exempt
 def api_favorites(request):

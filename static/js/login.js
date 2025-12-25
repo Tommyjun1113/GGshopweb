@@ -1,22 +1,29 @@
 document.addEventListener("DOMContentLoaded", () => {
   const auth = window.auth;
 
-  auth.onAuthStateChanged(async (user) => {
+   auth.onAuthStateChanged(async (user) => {
     if (!user) return;
 
-    const token = await user.getIdToken();
-    const res = await fetch("/api/firebase-login/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken(),
-      },
-      body: JSON.stringify({ token }),
-    });
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/firebase-login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
+        },
+        body: JSON.stringify({ token }),
+      });
 
-    const data = await res.json();
-    if (data.success) {
-      window.location.replace("/GGshopping/");
+      const data = await res.json();
+      if (data.success) {
+        window.location.replace("https://ggshopweb.onrender.com/GGshopping/");
+      } else {
+        alert("登入失敗，請稍後再試");
+      }
+    } catch (err) {
+      console.error("firebase-login error", err);
+      alert("登入發生錯誤");
     }
   });
 
@@ -37,13 +44,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Google
+  
   document.getElementById("google-login-btn")?.addEventListener("click", () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithRedirect(provider);
   });
 
-  // LINE
+  
   document.querySelector(".social-btn.line")?.addEventListener("click", () => {
     window.location.href = "/api/auth/line/login/";
   });

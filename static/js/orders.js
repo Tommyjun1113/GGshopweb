@@ -1,49 +1,186 @@
-auth.onAuthStateChanged(async user => {
-  if (!user) {
-    location.href = "/login/";
-    return;
-  }
 
+let currentReturnOrderId = null;
+const canReturnStatus = ["已完成", "待付款 / 處理中"];
+
+const statusClassMap = {
+  "PENDING": "pending",
+  "待付款 / 處理中": "pending",
+  "PAID": "paid",
+  "已完成": "paid",
+  "退貨申請中": "pending",
+  "已取消": "cancelled"
+};
+
+function waitForAuth() {
+  return new Promise(resolve => {
+    const unsub = auth.onAuthStateChanged(user => {
+      if (user) {
+        unsub();
+        resolve(user);
+      }
+    });
+  });
+}
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const user = await waitForAuth();
   const token = await user.getIdToken();
+
   const res = await fetch("/api/orders/", {
     headers: {
       Authorization: "Bearer " + token
     }
   });
 
+  if (res.status === 401) {
+    document.getElementById("orders-container").innerHTML =
+      `<p style="color:#c00;">登入狀態已失效，請重新登入</p>`;
+    return;
+  }
+
+  if (!res.ok) {
+    document.getElementById("orders-container").innerHTML =
+      `<p style="color:#c00;">訂單載入失敗</p>`;
+    return;
+  }
+
   const orders = await res.json();
   renderOrders(orders);
 });
 
+
 function renderOrders(orders) {
   const container = document.getElementById("orders-container");
+  container.innerHTML = "";
 
-  if (!orders.length) {
-    container.innerHTML = "<p>目前沒有購買紀錄</p>";
+  if (!Array.isArray(orders) || orders.length === 0) {
+    container.innerHTML = `<p class="empty">尚無購買紀錄</p>`;
     return;
   }
 
-  container.innerHTML = "";
-
   orders.forEach(order => {
-    const itemsHtml = order.items.map(item => `
-      <div class="order-item">
-        <div>${item.productName}（${item.size}）</div>
-        <div>數量：${item.quantity}</div>
-        <div>NT$ ${item.price}</div>
-      </div>
-    `).join("");
+    
+    let date = "";
+    if (order.createdAt?.seconds) {
+      date = new Date(order.createdAt.seconds * 1000).toLocaleString();
+    } else if (typeof order.createdAt === "number") {
+      date = new Date(order.createdAt).toLocaleString();
+    }
+
+    
+    let itemsHtml = "";
+    order.items.forEach(item => {
+      itemsHtml += `
+        <div class="order-item">
+          <img src="/static/products/${item.imageKey}.png" class="order-img">
+          <div class="order-item-info">
+            <div class="name">${item.productName}</div>
+            <div class="meta">
+              尺寸：${item.size} ｜ 數量：${item.quantity}
+            </div>
+            <div class="price">NT$ ${item.price}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    
+    let couponHtml = "";
+    if (order.coupon && order.discount > 0) {
+      couponHtml = `
+        <div class="order-coupon">
+          使用優惠券：<strong>${order.coupon.title}</strong>
+          <span class="discount">- NT$ ${order.discount}</span>
+        </div>
+      `;
+    }
+
+    let returnInfoHtml = "";
+    if (order.status === "退貨申請中" && order.return) {
+      returnInfoHtml = `
+        <div class="return-info">
+          <strong>退貨申請中</strong><br>
+          原因：${order.return.reason}<br>
+          ${order.return.note ? `說明：${order.return.note}` : ""}
+        </div>
+      `;
+    }
+
+    
+    let returnBtnHtml = "";
+    if (canReturnStatus.includes(order.status)) {
+      returnBtnHtml = `
+        <button class="return-btn"
+          onclick="openReturnModal('${order.id}')">
+          申請退貨
+        </button>
+      `;
+    }
 
     container.innerHTML += `
       <div class="order-card">
         <div class="order-header">
-          <span>訂單日期</span>
-          <span>NT$ ${order.total}</span>
+          <div>訂單日期：${date}</div>
+          <div>付款方式：${order.paymentMethod || "—"}</div>
+          <div class="status ${getStatusClass(order.status)}">
+            ${order.status}
+          </div>
         </div>
-        <div class="order-items">
-          ${itemsHtml}
+
+        <div class="order-items">${itemsHtml}</div>
+
+        ${couponHtml}
+        ${returnInfoHtml}
+        
+        <div class="order-footer">
+          <strong>NT$ ${order.total}</strong>
+          ${returnBtnHtml}
         </div>
       </div>
     `;
   });
 }
+
+
+function openReturnModal(orderId) {
+  currentReturnOrderId = orderId;
+  document.getElementById("return-modal").classList.remove("hidden");
+}
+
+function closeReturnModal() {
+  document.getElementById("return-modal").classList.add("hidden");
+}
+
+async function submitReturn() {
+  const reason = document.getElementById("return-reason").value;
+  const note = document.getElementById("return-note").value;
+
+  const token = await auth.currentUser.getIdToken();
+
+  const res = await fetch(`/api/orders/${currentReturnOrderId}/return/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({ reason, note })
+  });
+
+  if (res.ok) {
+    alert("退貨申請已送出");
+    location.reload();
+  } else {
+    alert("退貨失敗");
+  }
+}
+
+function getStatusClass(status) {
+  if (!status) return "";
+  if (status.includes("退貨")) return "returning";
+  if (status.includes("待付款")) return "pending";
+  if (status.includes("完成")) return "paid";
+  if (status.includes("取消")) return "cancelled";
+  return "";
+}
+

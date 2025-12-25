@@ -15,7 +15,7 @@
       {% endfor %}
     {% endif %}
 
-    <!-- ================= 登入 ================= -->
+    
     <div id="loginBox" class="form-box active">
         <h1 class="login-title">登入</h1>
         <div id="login-error" class="login-error"></div>
@@ -67,7 +67,7 @@
         </div>
     </div>
 
-    <!-- ================= 註冊 ================= -->
+    
     <div id="registerBox" class="form-box">
 
         <!-- 註冊 Step 1 -->
@@ -103,7 +103,7 @@
         </div>
     </div>
 
-    <!-- ================= 忘記密碼 ================= -->
+    
     <div id="forgotBox" class="form-box">
 
         <!-- 忘記密碼 Step 1 -->
@@ -148,32 +148,6 @@
 <script src="{% static 'js/login.js' %}"></script>
 <script src="{% static 'js/register.js' %}"></script>
 <script src="{% static 'js/forgot.js' %}"></script>
-
-<!-- 🔥🔥🔥 加在這裡 🔥🔥🔥 -->
-<script>
-firebase.auth().onAuthStateChanged(async (user) => {
-  if (!user) return;
-
-  const token = await user.getIdToken();
-
-  const res = await fetch("/api/firebase-login/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": document.querySelector(
-        'meta[name="csrf-token"]'
-      ).content,
-    },
-    body: JSON.stringify({ token }),
-  });
-
-  const data = await res.json();
-
-  if (data.success) {
-    window.location.replace("/GGshopping/");
-  }
-});
-</script>
 
 <script>
 function showError(id, message) {

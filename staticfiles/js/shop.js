@@ -4,14 +4,7 @@ app.controller("MainCtrl", function($scope) {
 
   let brand = new URLSearchParams(window.location.search).get("brand");
 
-  // 商品資料（加入 images + description + 自動產生 /product?sku=xxx）
-  let allProducts = window.productsData; // end allProducts
-
-
-
-  // --------------------------
-  // 依品牌篩選
-  // --------------------------
+  let allProducts = window.productsData; 
 
   if (brand) {
     $scope.productList = allProducts.filter(p => p.brand === brand);
@@ -20,10 +13,6 @@ app.controller("MainCtrl", function($scope) {
   }
 });
 
-
-// --------------------------
-// 商品卡片 Directive
-// --------------------------
 
 app.directive("productItem", function() {
   return {

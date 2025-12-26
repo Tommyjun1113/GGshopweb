@@ -12,10 +12,7 @@
 
 {% block content %}
 
-<!-- ⭐ page-layout (sidebar + 商品內容) -->
 <div class="page-layout mt-4">
-
-  <!-- 左側側邊欄 -->
   <aside class="sidebar-menu">
     <div class="menu-item">
       <div class="menu-title">
@@ -28,12 +25,9 @@
       </ul>
     </div>
   </aside>
-
-  <!-- 右側商品內容 -->
+  
   <section class="shop-content">
     <h2 class="mb-4">商品列表</h2>
-
-    <!-- Angular 主控制器 -->
     <div ng-app="shopApp" ng-controller="MainCtrl">
       <div class="product-grid">
         <product-item

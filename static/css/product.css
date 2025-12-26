@@ -24,27 +24,27 @@ body {
     object-fit: contain;
 }
 
-/* 縮圖列表 */
+
 .thumb-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 90px;               /* 左側欄固定寬度 */
+    width: 90px;              
 }
 
 .thumb-item {
-    width: 80px;               /* 每個縮圖框 固定大小 */
+    width: 80px;               
     height: 80px;
     border-radius: 6px;
     overflow: hidden;
-    background: #f3f3f3;       /* 沒載入圖片時也不會跳動 */
+    background: #f3f3f3;       
     cursor: pointer;
 }
 
 .thumb-item img {
     width: 100%;
     height: 100%;
-    object-fit: cover;         /* ⭐ 保持圖片比例，但裁切填滿方框 */
+    object-fit: cover;         
     transition: .2s;
 }
 
@@ -52,7 +52,7 @@ body {
     transform: scale(1.05);
 }
 
-/* 右側資訊 */
+
 .info-panel {
     width: 100%;
     justify-self: end;
@@ -64,7 +64,7 @@ body {
     line-height: 1.4;
 }
 
-/* 活動框 */
+
 .promo-box {
     background: #ececec;
     padding: 20px;
@@ -73,7 +73,7 @@ body {
     font-size: 14px;
 }
 
-/* 價格區 */
+
 .price-box {
     margin: 10px 0 25px;
 }
@@ -91,7 +91,7 @@ body {
     font-weight: bold;
 }
 
-/* 預購框 */
+
 .preorder-box {
     background: #404040;
     color: white;
@@ -101,7 +101,7 @@ body {
     line-height: 1.5;
 }
 
-/* 數量調整 */
+
 .qty-selector {
     display: flex;
     align-items: center;
@@ -125,7 +125,7 @@ body {
     background: #bbb;
 }
 
-/* 購買按鈕 */
+
 .buy-btn {
     width: 100%;
     padding: 16px 0;
@@ -157,14 +157,14 @@ body {
     background: #f7f7f7;
 }
 
-/* 商品描述外框 */
+
 .desc-wrapper {
     margin-top: 40px;
     border-top: 1px solid #ccc;
     padding-top: 20px;
 }
 
-/* 標題（含收合按鈕） */
+
 .desc-header {
     font-size: 20px;
     font-weight: 600;
@@ -181,7 +181,7 @@ body {
     font-weight: bold;
 }
 
-/* 內容區 */
+
 .desc-content {
     margin-top: 15px;
     line-height: 1.7;
@@ -189,13 +189,13 @@ body {
     color: #333;
 }
 
-/* 亮點文字 */
+
 .desc-highlight {
     font-weight: bold;
     font-size: 17px;
 }
 
-/* 次標題 */
+
 .desc-content h3 {
     margin-top: 25px;
     margin-bottom: 10px;
@@ -203,7 +203,7 @@ body {
     font-weight: 600;
 }
 
-/* 列表 */
+
 .desc-list {
     padding-left: 20px;
     list-style: disc;

@@ -26,7 +26,7 @@
 
       <label>
           *使用者名稱
-          <input id="name" type="text">
+          <input id="name" type="text"  maxlength="20" required>
       </label>
 
       <label>
@@ -36,11 +36,11 @@
 
       <label>
           手機號碼
-          <input id="phone" type="text" >
+          <input id="phone" type="text" inputmode="numeric" maxlength="10">
       </label>
       <label >
           生日
-          <input id="birthday" type="date" >
+          <input id="birthday" type="date"  max="{{ today|default:'' }}">
       </label>
       <label >
           性別
@@ -71,64 +71,7 @@
 
 {% block extra_js %}
 <script>
-
-auth.onAuthStateChanged(async user => {
-  if (!user) {
-    location.href = "/login/";
-    return;
-  }
-
-  const token = await user.getIdToken();
-  const res = await fetch("/api/profile/", {
-    headers: {
-      Authorization: "Bearer " + token
-    }
-  });
-
-  const data = await res.json();
-
-  document.getElementById("name").value = data.name || "";
-  document.getElementById("email").value = data.email || "";
-  document.getElementById("phone").value = data.phone || "";
-  document.getElementById("birthday").value = data.birthday || "";
-  document.getElementById("gender").value = data.gender || "";
-  document.getElementById("address").value = data.address || "";
-  document.getElementById("deleteAccountBtn").onclick = () => {
-    location.href = "{% url 'delete_account_page' %}";
-  };
-});
-
-
-document.getElementById("saveProfile").onclick = async () => {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  const token = await user.getIdToken();
-
-  const body = {
-    name: document.getElementById("name").value,
-    phone: document.getElementById("phone").value,
-    birthday: document.getElementById("birthday").value,
-    gender: document.getElementById("gender").value,
-    address: document.getElementById("address").value
-  };
-
-  const res = await fetch("/api/profile_update/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (res.ok) {
-    const btn = document.getElementById("saveProfile");
-    btn.innerText = "已儲存 ✔";
-    setTimeout(() => {location.reload();}, 800);
-  } else {
-    alert("更新失敗");
-  }
-};
+  const DELETE_ACCOUNT_URL = "{% url 'delete_account_page' %}";
 </script>
+<script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}

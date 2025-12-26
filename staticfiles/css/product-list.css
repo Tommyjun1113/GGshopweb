@@ -1,12 +1,25 @@
-/* 商品列表 Grid */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 32px;
-  width: 100%;
+
+.shop-content {
+  flex: 1;                  
+  max-width: 960px;
+  margin: 0 auto;
 }
 
-/* 商品卡片 */
+
+.shop-content h2 {
+  margin: 0 0 24px;
+  font-size: 22px;
+}
+
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  justify-content: center;   
+}
+
+
 .product-card {
   background: #fff;
   border-radius: 14px;
@@ -19,7 +32,7 @@
   box-shadow: 0 12px 28px rgba(0,0,0,.12);
 }
 
-/* 列表圖片（重點） */
+
 .product-card img {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -27,7 +40,7 @@
   display: block;
 }
 
-/* 商品資訊 */
+
 .product-info {
   padding: 14px 16px;
 }

@@ -222,6 +222,16 @@ def api_profile_update(request):
         return JsonResponse({"error": "Unauthorized"}, status=401)
 
     body = json.loads(request.body)
+
+    name = body.get("name", "").strip()
+    phone = body.get("phone", "")
+
+    if not (2 <= len(name) <= 20):
+        return JsonResponse({"error": "Invalid name"}, status=400)
+
+    if phone and not phone.startswith("09"):
+        return JsonResponse({"error": "Invalid phone"}, status=400)
+
     db = get_db()
     db.collection("users").document(uid).set(body, merge=True)
     return JsonResponse({"success": True})

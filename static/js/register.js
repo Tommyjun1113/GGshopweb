@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      window.location.href = "/GGshopping/";
+      window.location.href = "https://ggshopweb.onrender.com/GGshopping/";
     } catch (e) {
       let msg = "註冊失敗";
       if (e.code === "auth/email-already-in-use") msg = "此 Email 已被註冊";

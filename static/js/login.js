@@ -1,32 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
   const auth = window.auth;
-
-   auth.onAuthStateChanged(async (user) => {
+  if (window.location.pathname.includes("/login")) {
+    auth.onAuthStateChanged(async (user) => {
     if (!user) return;
 
     try {
-      const token = await user.getIdToken();
-      const res = await fetch("/api/firebase-login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCSRFToken(),
-        },
-        credentials: "include",
-        body: JSON.stringify({ token }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        window.location.replace("https://ggshopweb.onrender.com/GGshopping/");
-      } else {
-        alert("登入失敗，請稍後再試");
-      }
-    } catch (err) {
-      console.error("firebase-login error", err);
-      alert("登入發生錯誤");
+      await syncDjangoSession(user);
+      window.location.replace("https://ggshopweb.onrender.com/GGshopping/");
+   } catch (err) {
+     console.error("sync login error", err);
     }
   });
+}
 
   // Email 登入
   document.getElementById("email-login-btn")?.addEventListener("click", async () => {

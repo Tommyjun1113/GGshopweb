@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
           "Content-Type": "application/json",
           "X-CSRFToken": getCSRFToken(),
         },
+        credentials: "include",
         body: JSON.stringify({ token }),
       });
 

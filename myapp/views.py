@@ -226,45 +226,35 @@ def api_profile_update(request):
     db.collection("users").document(uid).set(body, merge=True)
     return JsonResponse({"success": True})
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def api_delete_account(request):
-    user = request.user
 
-    
+@csrf_exempt
+def api_delete_account(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False}, status=405)
+
     uid = get_uid_from_request(request)
     if not uid:
-        return Response({"success": False, "error": "No UID"}, status=401)
+        return JsonResponse({"success": False, "error": "No UID"}, status=401)
 
     db = get_db()
 
     try:
-        
         user_ref = db.collection("users").document(uid)
 
-        
-        for col in ["cart", "orders", "coupons"]:
-            docs = user_ref.collection(col).stream()
-            for doc in docs:
+        for col in ["cart", "orders", "coupons", "favorites"]:
+            for doc in user_ref.collection(col).stream():
                 doc.reference.delete()
 
-        
         user_ref.delete()
 
-        
-        firebase_auth.delete_user(uid)
+        User = get_user_model()
+        User.objects.filter(username=f"firebase_{uid}").delete()
 
-        
-        user.delete()
-
-        return Response({"success": True})
+        return JsonResponse({"success": True})
 
     except Exception as e:
         print("❌ delete_account error:", e)
-        return Response(
-            {"success": False, "error": str(e)},
-            status=500
-        )
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
 @csrf_exempt
@@ -576,24 +566,38 @@ def api_order_submit(request):
     coupon_map = None
 
     if coupon_id:
-        coupon_ref = db.collection("users").document(uid).collection("coupons").document(coupon_id)
+        coupon_ref = db.collection("users").document(uid) \
+            .collection("coupons").document(coupon_id)
         coupon_doc = coupon_ref.get()
 
-        if coupon_doc.exists:
-            c = coupon_doc.to_dict()
-            if not c.get("used", False) and int(c.get("minSpend", 0)) <= subtotal:
-                discount = int(c.get("value", 0))
+    if coupon_doc.exists:
+        c = coupon_doc.to_dict()
 
-                coupon_map = {
-                    "id": coupon_id,
-                    "title": c.get("title"),
-                    "value": int(c.get("value", 0)),
-                }
+        if not c.get("used", False) and int(c.get("minSpend", 0)) <= subtotal:
+            coupon_type = c.get("type")
+            value = int(c.get("value", 0))
 
-                coupon_ref.update({
-                    "used": True,
-                    "usedAt": firestore.SERVER_TIMESTAMP
-                })
+            if coupon_type == "AMOUNT":
+                discount = value
+
+            elif coupon_type == "PERCENT":
+                discount = int(subtotal * value / 100)
+
+            
+            discount = min(discount, subtotal)
+
+            coupon_map = {
+                "id": coupon_id,
+                "title": c.get("title"),
+                "type": coupon_type,
+                "value": value,
+            }
+
+            coupon_ref.update({
+                "used": True,
+                "usedAt": firestore.SERVER_TIMESTAMP
+            })
+
 
     total = max(subtotal - discount, 0)
 

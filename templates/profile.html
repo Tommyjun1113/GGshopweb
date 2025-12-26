@@ -71,9 +71,7 @@
 
 {% block extra_js %}
 <script>
-/* ===============================
-   載入會員資料
-=============================== */
+
 auth.onAuthStateChanged(async user => {
   if (!user) {
     location.href = "/login/";
@@ -100,9 +98,7 @@ auth.onAuthStateChanged(async user => {
   };
 });
 
-/* ===============================
-   儲存會員資料
-=============================== */
+
 document.getElementById("saveProfile").onclick = async () => {
   const user = auth.currentUser;
   if (!user) return;
@@ -129,7 +125,7 @@ document.getElementById("saveProfile").onclick = async () => {
   if (res.ok) {
     const btn = document.getElementById("saveProfile");
     btn.innerText = "已儲存 ✔";
-    setTimeout(() => btn.innerText = "儲存修改", 1500);
+    setTimeout(() => {location.reload();}, 800);
   } else {
     alert("更新失敗");
   }

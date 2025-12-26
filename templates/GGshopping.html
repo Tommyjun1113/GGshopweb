@@ -143,7 +143,7 @@
     firebase.initializeApp(firebaseConfig);
     }
 
-    window.auth = firebase.auth(); // 🔥 掛到 window
+    window.auth = firebase.auth(); 
   </script>
 
   <script>
@@ -166,10 +166,10 @@
         const snap = await ref.get();
 
         if (!snap.exists) {
-          // 第一次登入才建立
+          
           await ref.set(userData);
         } else {
-          // 只更新 email / provider，不動 name
+          
           await ref.set({
             email: user.email || "",
             provider: user.providerData.map(p => p.providerId).join(","),
@@ -177,11 +177,12 @@
         };
 
         const data = snap.exists ? snap.data() : userData;
+        const displayName =data.name ||(data.email ? data.email.split("@")[0] : "");
 
         memberArea.innerHTML = `
           <div class="member-menu">
             <span id="member-toggle" class="welcome-text">
-              👋 ${ data.name || data.email } ▾
+              👋 ${ displayName } ▾
             </span>
 
             <div id="member-dropdown" class="member-dropdown d-none">

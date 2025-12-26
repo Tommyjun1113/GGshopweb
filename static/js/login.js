@@ -15,20 +15,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Email 登入
   document.getElementById("email-login-btn")?.addEventListener("click", async () => {
-    const email = document.querySelector("input[name='account']").value.trim();
-    const password = document.querySelector("input[name='password']").value;
+  const accountInput = document.querySelector("input[name='account']");
+  const passwordInput = document.querySelector("input[name='password']");
 
-    if (!email || !password) {
-      alert("請輸入帳號密碼");
-      return;
-    }
+  const email = accountInput.value.trim();
+  const password = passwordInput.value;
 
-    try {
-      await auth.signInWithEmailAndPassword(email, password);
-    } catch (e) {
-      alert(e.message);
-    }
-  });
+  
+  hideError("login-error");
+  accountInput.classList.remove("input-error");
+  passwordInput.classList.remove("input-error");
+
+  
+  if (!email || !password) {
+    showError("login-error", "請輸入帳號與密碼");
+    if (!email) accountInput.classList.add("input-error");
+    if (!password) passwordInput.classList.add("input-error");
+    return;
+  }
+
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (e) {
+    console.error(e);
+
+    const msg = firebaseErrorToMessage(e);
+    showError("login-error", msg);
+
+    
+    accountInput.classList.add("input-error");
+    passwordInput.classList.add("input-error");
+  }
+});
 
   
   document.getElementById("google-login-btn")?.addEventListener("click", () => {

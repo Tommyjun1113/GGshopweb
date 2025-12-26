@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await user.delete();
 
       alert("帳戶已永久刪除");
-      location.href = "/";
+      location.href = "https://ggshopweb.onrender.com/login/";
 
     } catch (err) {
       console.error(err);

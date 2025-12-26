@@ -29,14 +29,14 @@
     background: #fff;
 }
 
-/* 標題 */
+
 .login-title {
     font-size: 28px;
     font-weight: 600;
     margin-bottom: 32px;
 }
 
-/* 輸入框 */
+
 .login-input {
     width: 100%;
     padding: 14px 12px;
@@ -57,15 +57,16 @@
   padding: 10px 14px;
   border-radius: 8px;
 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
   font-size: 14px;
   line-height: 1.4;
   color: #b42318;
 
   background-color: #fdecea;
   border: 1px solid #f5c2c7;
-
-  align-items: center;
-  gap: 8px;
 }
 .login-error::before {
   content: "⚠️";
@@ -75,7 +76,7 @@
   border-bottom: 2px solid #e53935 !important;
 }
 
-/* 幫助提示 */
+
 .helper-text {
     font-size: 14px;
     color: #666;
@@ -88,7 +89,7 @@
     margin-left: 8px;
 }
 
-/* 登入按鈕 */
+
 .login-btn {
     width: 100%;
     padding: 14px 0;
@@ -104,7 +105,7 @@
     background: #173c60;
 }
 
-/* 分隔文字 */
+
 .divider {
     text-align: center;
     margin: 24px 0 16px;
@@ -112,7 +113,7 @@
     color: #666;
 }
 
-/* 社群登入 */
+
 .social-login {
     display: flex;
     justify-content: center;
@@ -137,7 +138,7 @@
     height: 22px;
 }
 
-/* LINE */
+
 .social-btn.line {
     background: #06c755;
     border: none;
@@ -147,7 +148,7 @@
     filter: brightness(0) invert(1);
 }
 
-/* 註冊 */
+
 .register-section {
     text-align: center;
     margin-top: 32px;
@@ -173,7 +174,7 @@
 }
 
 
-/* ===== 表單切換 ===== */
+
 .form-box {
     display: none;
 }
@@ -182,7 +183,6 @@
     display: block;
 }
 
-/* ===== 註冊步驟 ===== */
 .form-step {
     display: none;
 }
@@ -190,3 +190,4 @@
 .form-step.active {
     display: block;
 }
+

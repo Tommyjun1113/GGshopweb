@@ -14,7 +14,7 @@ def get_db():
 
     if not firebase_admin._apps:
         if os.getenv("RENDER"):
-            # Render：用 Secret File
+            
             cred = credentials.Certificate("/etc/secrets/firebase.json")
         else:
             # 本機：請確定這個檔案真的存在 #shopping-54704-firebase-adminsdk-fbsvc-45a36d8480.json

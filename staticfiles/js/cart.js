@@ -6,9 +6,7 @@ let selectedCoupon = null;
 let selectedCouponId = null;
 let userWantsCoupon = false;
 
-/* =============================
-   等待 Firebase 登入
-============================= */
+
 function waitForAuth() {
   return new Promise(resolve => {
     const unsub = auth.onAuthStateChanged(user => {
@@ -26,9 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadCart();
 });
 
-/* =============================
-   載入購物車
-============================= */
+
 async function loadCart() {
   const res = await fetch("/api/cart/", {
     headers: { Authorization: "Bearer " + authToken }
@@ -54,9 +50,8 @@ async function loadCart() {
   updateActionState();
 }
 
-/* =============================
-   Render Cart
-============================= */
+
+
 function renderCart() {
   const container = document.getElementById("cart-container");
   container.innerHTML = "";
@@ -117,12 +112,12 @@ async function loadBestCoupon() {
   availableCoupons = (data.coupons || []).map(c => {
     let type = String(c.type || "").toUpperCase();
 
-    // ⭐ 關鍵補救：後端沒給 type，用 value / title 判斷
+    
     if (!type) {
       if (c.value < 100) {
-        type = "PERCENT";   // 10 → 10%
+        type = "PERCENT";   
       } else {
-        type = "AMOUNT";    // 300 → 折 300
+        type = "AMOUNT";   
       }
     }
 
@@ -138,9 +133,7 @@ async function loadBestCoupon() {
 }
 
 
-/* =============================
-   勾選 / 全選
-============================= */
+
 document.addEventListener("change", e => {
   if (e.target.classList.contains("cart-check")) {
     const id = String(e.target.dataset.id);
@@ -176,9 +169,7 @@ function syncSelectAll() {
   document.getElementById("selectAll").checked = (all > 0 && selectedIds.size === all);
 }
 
-/* =============================
-   加減數量
-============================= */
+
 document.addEventListener("click", async e => {
   if (!e.target.classList.contains("qty-btn")) return;
 
@@ -217,9 +208,7 @@ function updateActionState() {
 }
 
 
-/* =============================
-   金額計算（只算勾選）
-============================= */
+
 function calcDiscount(coupon, subtotal) {
   if (!coupon) return 0;
   if (coupon.type === "PERCENT") {
@@ -290,7 +279,7 @@ function recalc() {
 
   selectedCouponId = bestCoupon.id;
 
-  // ⭐⭐⭐ 關鍵：自動套用優惠券
+  
   userWantsCoupon = true;
   document.getElementById("useCoupon").checked = true;
 }
@@ -359,9 +348,7 @@ function recalc() {
   document.getElementById("cart-final-total").innerText = `NT$ ${Math.max(total, 0)}`;
 }
 
-/* =============================
-   前往結帳（只送勾選）
-============================= */
+
 document.getElementById("deleteSelected").onclick = async () => {
   if (!selectedIds.size) return;
 

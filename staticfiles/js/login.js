@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 }
 
-  // Email 登入
   document.getElementById("email-login-btn")?.addEventListener("click", async () => {
   const accountInput = document.querySelector("input[name='account']");
   const passwordInput = document.querySelector("input[name='password']");

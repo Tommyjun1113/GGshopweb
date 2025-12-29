@@ -93,12 +93,12 @@ def firebase_login(request):
             }
         )
 
-        # 若 email 有更新，補上
+       
         if user.email != email:
             user.email = email
             user.save()
 
-        # ✅ 2️⃣ 關鍵：登入 Django（建立 session）
+        
         login(request, user)
         
         db = get_db()
@@ -110,13 +110,13 @@ def firebase_login(request):
         }, merge=True)
         coupons_ref = db.collection("users").document(uid).collection("coupons")
 
-        # 檢查是否已經發過券（避免重複）
+        
         has_coupon = list(coupons_ref.limit(1).stream())
 
         if not has_coupon:
             now = firestore.SERVER_TIMESTAMP
 
-            # 🎟️ 優惠券 1：滿 3000 折 300
+            
             coupons_ref.document("SAVE300").set({
                 "title": "滿 3000 折 300",
                 "type": "AMOUNT",
@@ -127,7 +127,7 @@ def firebase_login(request):
                 "expireDate": "2026/01/31"
             })
 
-            # 🎟️ 優惠券 2：新會員 9 折
+            
             coupons_ref.document("WELCOME10").set({
                 "title": "新會員 9 折",
                 "type": "PERCENT",
@@ -287,7 +287,7 @@ def api_forgot_send_code(request):
     code = str(random.randint(100000, 999999))
     users[0].reference.update({"resetCode": code})
 
-    # 🔥 呼叫 Firebase Cloud Function（sendResetCode）
+    
     requests.post(
         "https://us-central1-shopping-54704.cloudfunctions.net/sendResetCode",
         json={
@@ -574,13 +574,14 @@ def api_order_submit(request):
     
     discount = 0
     coupon_map = None
+    coupon_doc = None
 
     if coupon_id:
         coupon_ref = db.collection("users").document(uid) \
             .collection("coupons").document(coupon_id)
         coupon_doc = coupon_ref.get()
 
-    if coupon_doc.exists:
+    if coupon_doc and coupon_doc.exists:
         c = coupon_doc.to_dict()
 
         if not c.get("used", False) and int(c.get("minSpend", 0)) <= subtotal:

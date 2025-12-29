@@ -5,7 +5,6 @@ def get_uid_from_request(request):
     try:
         init_firebase()
 
-        # ✅ Django 正確取得 Authorization 的方式
         auth_header = request.META.get("HTTP_AUTHORIZATION")
 
         if not auth_header:
@@ -20,7 +19,7 @@ def get_uid_from_request(request):
 
         decoded = firebase_auth.verify_id_token(
             token,
-            clock_skew_seconds=10  # ✅ Render 必加
+            clock_skew_seconds=10  
         )
 
         return decoded.get("uid")

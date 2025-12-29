@@ -4,8 +4,8 @@
     background-color: var(--copyright-background,#000000);
     padding: 20px 0;
     font-size: clamp(12px, 2.8vw, 14px);
-    position: static;    /* ❗移除 fixed */
-    height: auto;        /* 自動高度 */
+    position: static;  
+    height: auto;       
     bottom: 0;
 }
 

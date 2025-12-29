@@ -2,16 +2,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = window.auth;
   if (window.location.pathname.includes("/login")) {
     auth.onAuthStateChanged(async (user) => {
-    if (!user) return;
+      if (!user) return;
 
-    try {
-      await syncDjangoSession(user);
-      window.location.replace("https://ggshopweb.onrender.com/GGshopping/");
-   } catch (err) {
-     console.error("sync login error", err);
-    }
-  });
-}
+      try {
+        await syncDjangoSession(user);
+        window.location.replace("https://ggshopweb.onrender.com/GGshopping/");
+      } catch (err) {
+        console.error("sync login error", err);
+      }
+    });
+  } 
 
   document.getElementById("email-login-btn")?.addEventListener("click", async () => {
   const accountInput = document.querySelector("input[name='account']");
@@ -37,15 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
     await auth.signInWithEmailAndPassword(email, password);
   } catch (e) {
     console.error(e);
-
     const msg = firebaseErrorToMessage(e);
     showError("login-error", msg);
-
-    
     accountInput.classList.add("input-error");
     passwordInput.classList.add("input-error");
   }
-});
+  });
 
   
   document.getElementById("google-login-btn")?.addEventListener("click", () => {

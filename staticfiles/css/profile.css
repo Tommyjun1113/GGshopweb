@@ -1,4 +1,3 @@
-/*layout*/
 .profile-layout {
   display: flex;
   gap: 32px;
@@ -8,7 +7,6 @@
   box-sizing: border-box;
 }
 
-/*sidebar*/
 .sidebar-profile-menu {
   width: 220px;
   flex-shrink: 0;
@@ -48,7 +46,6 @@
   background: #333;
 }
 
-/*profile*/
 .profile-card {
   flex: 1;
   background: #fff;
@@ -66,7 +63,7 @@
   margin-bottom: 24px;
 }
 
-/* 表單 */
+
 .profile-card label {
   display: block;
   margin-bottom: 16px;
@@ -83,7 +80,7 @@
   box-sizing: border-box;
 }
 
-/* 按鈕 */
+
 #saveProfile {
   margin-top: 24px;
   padding: 12px;

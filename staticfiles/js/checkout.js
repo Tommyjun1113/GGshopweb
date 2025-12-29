@@ -5,9 +5,7 @@ let discount = 0;
 let total = 0;
 let selectedCoupon = null;
 
-// =============================
-// 驗證登入 + 載入資料
-// =============================
+
 auth.onAuthStateChanged(async (user) => {
   if (!user) {
     window.location.href = "/login/";
@@ -21,9 +19,7 @@ auth.onAuthStateChanged(async (user) => {
   renderPaymentForm();
 });
 
-// =============================
-// 讀取購物車
-// =============================
+
 function loadCheckoutItems() {
   const raw = sessionStorage.getItem("checkoutItems");
 
@@ -44,9 +40,7 @@ function loadCheckoutItems() {
   renderItems();
 }
 
-// =============================
-// 顯示商品
-// =============================
+
 function renderItems() {
   const container = document.getElementById("order-items");
   container.innerHTML = "";
@@ -113,17 +107,13 @@ function loadCouponFromCart() {
 }
 
 
-// =============================
-// 更新結帳金額
-// =============================
+
 function updateTotal() {
   total = Math.max(subtotal - discount, 0);
   document.getElementById("total").innerText = `NT$ ${total}`;
 }
 
-// =============================
-// 付款方式切換
-// =============================
+
 document.querySelectorAll("input[name='payment']").forEach(radio => {
   radio.addEventListener("change", renderPaymentForm);
 });
@@ -195,9 +185,7 @@ function validateOrder(method) {
 
   return ok;
 }
-// =============================
-// 送出訂單
-// =============================
+
 document.getElementById("submitOrder").addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) {

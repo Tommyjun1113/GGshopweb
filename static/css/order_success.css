@@ -16,7 +16,7 @@
   box-shadow: 0 12px 30px rgba(0,0,0,0.08);
 }
 
-/* 成功 icon */
+
 .success-icon {
   width: 72px;
   height: 72px;
@@ -31,13 +31,13 @@
   justify-content: center;
 }
 
-/* 標題 */
+
 .order-success-card h1 {
   font-size: 26px;
   margin-bottom: 12px;
 }
 
-/* 說明文字 */
+
 .success-desc {
   color: #666;
   font-size: 15px;
@@ -45,7 +45,7 @@
   margin-bottom: 32px;
 }
 
-/* 按鈕區 */
+
 .success-actions {
   display: flex;
   gap: 16px;
@@ -53,7 +53,7 @@
   flex-wrap: wrap;
 }
 
-/* 按鈕樣式 */
+
 .btn-primary,
 .btn-outline {
   padding: 12px 22px;

@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-  // Step 1：送驗證碼
   document.getElementById("forgot-btn")?.addEventListener("click", async () => {
     const email = document.getElementById("forgotAccount").value.trim();
     if (!email) return alert("請輸入 Email");
@@ -20,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Step 2：驗證碼
+ 
   document.getElementById("forgot-confirm-btn")?.addEventListener("click", async () => {
     const email = document.getElementById("forgotAccount").value.trim();
     const code = document.getElementById("forgotCode").value.trim();
@@ -48,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Step 3：重設密碼
+  
   document.getElementById("reset-password-btn")?.addEventListener("click", async () => {
     const email = document.getElementById("forgotAccount").value.trim();
     const p1 = document.getElementById("newPwd").value;

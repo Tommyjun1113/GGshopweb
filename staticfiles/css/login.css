@@ -1,25 +1,25 @@
 .content {
-  min-height: calc(100vh - 220px); 
-  display: flex;
-  justify-content: center; 
-  align-items: center;     
+    min-height: calc(100vh - 220px); 
+    display: flex;
+    justify-content: center; 
+    align-items: center;     
 }
 
 .msg {
-  padding: 10px;
-  margin-bottom: 12px;
-  border-radius: 4px;
-  font-size: 14px;
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    font-size: 14px;
 }
 
 .msg.error {
-  background: #fdecea;
-  color: #c62828;
+    background: #fdecea;
+    color: #c62828;
 }
 
 .msg.success {
-  background: #e8f5e9;
-  color: #2e7d32;
+    background: #e8f5e9;
+    color: #2e7d32;
 }
 
 .login-container {
@@ -52,28 +52,28 @@
 }
 
 .login-error {
-  display: none;
-  margin: 12px 0 18px;
-  padding: 10px 14px;
-  border-radius: 8px;
+    display: none;
+    margin: 12px 0 18px;
+    padding: 10px 14px;
+    border-radius: 8px;
 
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-  font-size: 14px;
-  line-height: 1.4;
-  color: #b42318;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #b42318;
 
-  background-color: #fdecea;
-  border: 1px solid #f5c2c7;
+    background-color: #fdecea;
+    border: 1px solid #f5c2c7;
 }
 .login-error::before {
-  content: "⚠️";
-  font-size: 16px;
+    content: "⚠️";
+    font-size: 16px;
 }
 .input-error {
-  border-bottom: 2px solid #e53935 !important;
+    border-bottom: 2px solid #e53935 !important;
 }
 
 

@@ -1,12 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
 
   function getCSRFToken() {
-  return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-}
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  }
 
-  // =============================
-  // 取得 SKU & 商品
-  // =============================
+ 
   const sku = new URLSearchParams(window.location.search).get("sku");
   const allProducts = window.productsData;
 
@@ -18,18 +16,15 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  // =============================
-  // 基本商品資訊
-  // =============================
+  
   document.querySelector(".title").textContent = product.title;
   document.querySelector(".new-price").textContent = "NT$" + product.price;
 
   const mainImage = document.getElementById("mainImage");
   mainImage.src = product.images[0];
 
-  // =============================
-  // 縮圖
-  // =============================
+  
+
   const thumbList = document.querySelector(".thumb-list");
   thumbList.innerHTML = "";
 
@@ -48,9 +43,8 @@ document.addEventListener("DOMContentLoaded", function () {
     mainImage.src = src;
   };
 
-  // =============================
-  // 商品描述（重點）
-  // =============================
+ 
+
   document.getElementById("descHighlight").textContent =
     product.description.highlight;
 
@@ -66,9 +60,8 @@ document.addEventListener("DOMContentLoaded", function () {
     noticeList.insertAdjacentHTML("beforeend", `<li>${text}</li>`);
   });
 
-  // =============================
-  // 展開 / 收合（關鍵）
-  // =============================
+  
+
   const descHeader = document.getElementById("descHeader");
   const descContent = document.getElementById("descContent");
   const descToggle = document.getElementById("descToggle");
@@ -88,164 +81,160 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // =============================
-  // 數量
-  // =============================
+  
+
   window.changeQty = function (n) {
     const qtyEl = document.getElementById("qtyValue");
     let qty = parseInt(qtyEl.innerText, 10) + n;
     qtyEl.innerText = qty < 1 ? 1 : qty;
   };
 
-// =============================
-// 加入購物車（API 版本）
-// =============================
-const addToCartBtn = document.getElementById("addToCartBtn");
-const sizeSelect = document.getElementById("sizeSelect");
-const qtyEl = document.getElementById("qtyValue");
 
-addToCartBtn.addEventListener("click", async function () {
 
-  if (!sizeSelect.value || sizeSelect.value === "請選擇") {
-    alert("請先選擇尺寸");
-    return;
-  }
-  const imageKey = product.images[0]
-  .split("/")
-  .pop()
-  .replace(".png", "");
-  const payload = {
-    productId: product.sku,
-    productName: product.title,
-    price: product.price,
-    quantity: parseInt(qtyEl.innerText, 10),
-    size: sizeSelect.value,
-    imageKey: imageKey,
-    
-    createdAt: Date.now()
-  };
-  const token = await auth.currentUser.getIdToken();
-  const res = await fetch("/api/cart/add/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-       Authorization: "Bearer " + token
-    },
-    body: JSON.stringify(payload)
-  });
+  const addToCartBtn = document.getElementById("addToCartBtn");
+  const sizeSelect = document.getElementById("sizeSelect");
+  const qtyEl = document.getElementById("qtyValue");
 
-  const data = await res.json();
+  addToCartBtn.addEventListener("click", async function () {
 
-  if (data.success) {
-    await updateCartBadge();
-    alert("已加入購物車");
-  } else {
-    alert("加入失敗，請先登入");
-  }
-});
-
-async function updateCartBadge() {
-  try {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const token = await user.getIdToken();
-
-    const res = await fetch("/api/cart/", {
+    if (!sizeSelect.value || sizeSelect.value === "請選擇") {
+      alert("請先選擇尺寸");
+      return;
+    }
+    const imageKey = product.images[0]
+    .split("/")
+    .pop()
+    .replace(".png", "");
+    const payload = {
+      productId: product.sku,
+      productName: product.title,
+      price: product.price,
+      quantity: parseInt(qtyEl.innerText, 10),
+      size: sizeSelect.value,
+      imageKey: imageKey,
+      
+      createdAt: Date.now()
+    };
+    const token = await auth.currentUser.getIdToken();
+    const res = await fetch("/api/cart/add/", {
+      method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: "Bearer " + token
-      }
+      },
+      body: JSON.stringify(payload)
     });
 
-    if (!res.ok) return;
+    const data = await res.json();
 
-    const cart = await res.json();
-    const badge = document.getElementById("cart-badge");
-    if (!badge) return;
-
-    if (cart.length > 0) {
-      const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
-      badge.classList.remove("d-none");
-      badge.innerText = totalQty;
+    if (data.success) {
+      await updateCartBadge();
+      alert("已加入購物車");
     } else {
-      badge.classList.add("d-none");
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
-// =============================
-// 收藏（Favorites）
-// =============================
-const favoriteBtn = document.getElementById("favoriteBtn");
-
-if (favoriteBtn) {
-  const productId = product.sku;
-
-  const OUTLINE = "/static/icons/heart.png";
-  const FILLED  = "/static/icons/img_9.png";
-
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      favoriteBtn.src = OUTLINE;
-      favoriteBtn.dataset.fav = "0";
-      return;
-    }
-
-    const uid = user.uid;
-    const favRef = firebase
-      .firestore()
-      .collection("users")
-      .doc(uid)
-      .collection("favorites")
-      .doc(productId);
-
-    const snap = await favRef.get();
-    if (snap.exists) {
-      favoriteBtn.src = FILLED;
-      favoriteBtn.dataset.fav = "1";
-    } else {
-      favoriteBtn.src = OUTLINE;
-      favoriteBtn.dataset.fav = "0";
+      alert("加入失敗，請先登入");
     }
   });
-    // 點擊收藏
-     favoriteBtn.addEventListener("click", async () => {
-    const user = auth.currentUser;
 
-    // ❗沒登入 → 直接跳登入頁
-    if (!user) {
-      const goLogin = confirm("請先登入才能加入收藏，是否前往登入？");
-      if (goLogin) {
-      window.location.href = "/login/";
-      }
-      return;
-    }
+  async function updateCartBadge() {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
 
-    const uid = user.uid;
-    const favRef = firebase
-      .firestore()
-      .collection("users")
-      .doc(uid)
-      .collection("favorites")
-      .doc(productId);
+      const token = await user.getIdToken();
 
-    const isFav = favoriteBtn.dataset.fav === "1";
-
-    if (isFav) {
-      // 取消收藏
-      await favRef.delete();
-      favoriteBtn.src = OUTLINE;
-      favoriteBtn.dataset.fav = "0";
-    } else {
-      // 加入收藏（和 APP 共用）
-      await favRef.set({
-        productId: productId,
-        createdAt: Date.now()
+      const res = await fetch("/api/cart/", {
+        headers: {
+          Authorization: "Bearer " + token
+        }
       });
-      favoriteBtn.src = FILLED;
-      favoriteBtn.dataset.fav = "1";
+
+      if (!res.ok) return;
+
+      const cart = await res.json();
+      const badge = document.getElementById("cart-badge");
+      if (!badge) return;
+
+      if (cart.length > 0) {
+        const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+        badge.classList.remove("d-none");
+        badge.innerText = totalQty;
+      } else {
+        badge.classList.add("d-none");
+      }
+    } catch (err) {
+      console.error(err);
     }
-  });
-}
+  }
+
+  const favoriteBtn = document.getElementById("favoriteBtn");
+
+  if (favoriteBtn) {
+    const productId = product.sku;
+
+    const OUTLINE = "/static/icons/heart.png";
+    const FILLED  = "/static/icons/img_9.png";
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        favoriteBtn.src = OUTLINE;
+        favoriteBtn.dataset.fav = "0";
+        return;
+      }
+
+      const uid = user.uid;
+      const favRef = firebase
+        .firestore()
+        .collection("users")
+        .doc(uid)
+        .collection("favorites")
+        .doc(productId);
+
+      const snap = await favRef.get();
+      if (snap.exists) {
+        favoriteBtn.src = FILLED;
+        favoriteBtn.dataset.fav = "1";
+      } else {
+        favoriteBtn.src = OUTLINE;
+        favoriteBtn.dataset.fav = "0";
+      }
+    });
+     
+      favoriteBtn.addEventListener("click", async () => {
+      const user = auth.currentUser;
+
+     
+      if (!user) {
+        const goLogin = confirm("請先登入才能加入收藏，是否前往登入？");
+        if (goLogin) {
+        window.location.href = "/login/";
+        }
+        return;
+      }
+
+      const uid = user.uid;
+      const favRef = firebase
+        .firestore()
+        .collection("users")
+        .doc(uid)
+        .collection("favorites")
+        .doc(productId);
+
+      const isFav = favoriteBtn.dataset.fav === "1";
+
+      if (isFav) {
+        
+        await favRef.delete();
+        favoriteBtn.src = OUTLINE;
+        favoriteBtn.dataset.fav = "0";
+      } else {
+        
+        await favRef.set({
+          productId: productId,
+          createdAt: Date.now()
+        });
+        favoriteBtn.src = FILLED;
+        favoriteBtn.dataset.fav = "1";
+      }
+    });
+  }
 });

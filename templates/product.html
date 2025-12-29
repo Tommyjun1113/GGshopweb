@@ -6,7 +6,7 @@
 {% endblock title %}
 
 {% block top_banner %}
-<!-- 商品頁不要顯示首頁 banner / newmember 圖 -->
+
 {% endblock top_banner %}
 
 {% block head %}
@@ -18,7 +18,7 @@
 
 <div class="main-wrapper container mt-4">
 
-  <!-- 左側欄 -->
+  
   <div class="left-panel">
 
     <div class="breadcrumb">
@@ -28,12 +28,12 @@
     <div class="thumb-list"></div>
   </div>
 
-  <!-- 中間主圖 -->
+  
   <div class="image-panel">
     <img id="mainImage" src="" class="main-image">
   </div>
 
-  <!-- 右側資訊 -->
+  
   <div class="info-panel">
 
    <div class="title-row">
@@ -47,24 +47,24 @@
       data-product-id="{{ product.id }}"
     >
   </div>
-    <!-- 活動框 -->
+    
     <div class="promo-box">
       至1/31 23:59截止 全店，滿3000折300
     </div>
 
-    <!-- 價格 -->
+    
     <div class="price-box">
       <span class="old-price"></span>
       <span class="new-price"></span>
     </div>
 
-    <!-- 預購描述 -->
+    
     <div class="preorder-box">
       預購商品須等待約2-4周（不含假日）<br>
       依訂單順序陸續出貨
     </div>
 
-    <!-- 尺寸 -->
+    
     <div class="size-box">
       <label for="sizeSelect">選擇尺寸</label>
       <select id="sizeSelect" class="size-select">
@@ -76,18 +76,18 @@
       </select>
     </div>
 
-    <!-- 數量 -->
+    
     <div class="qty-selector">
       <button type="button" onclick="changeQty(-1)" class="qty-btn">−</button>
       <span id="qtyValue">1</span>
       <button type="button" onclick="changeQty(1)" class="qty-btn">＋</button>
     </div>
 
-    <!-- 加入購物車 -->
+    
      <button type="button" class="buy-btn" id="addToCartBtn">
         加入購物車
     </button>
-    <!-- 商品描述 -->
+    
     <div class="desc-wrapper">
 
       <div class="desc-header" id="descHeader">
